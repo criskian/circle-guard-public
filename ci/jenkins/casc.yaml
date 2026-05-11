@@ -1,0 +1,138 @@
+jenkins:
+  systemMessage: "CircleGuard CI/CD — Taller 2 Ingeniería de Software"
+  numExecutors: 4
+  mode: NORMAL
+
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: "admin"
+          password: "admin123"
+          properties:
+            - "apiToken"
+
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
+
+  globalNodeProperties:
+    - envVars:
+        env:
+          - key: CIRCLE_GUARD_ROOT
+            value: /workspace/circle-guard-public
+          - key: KUBECONFIG
+            value: /var/jenkins_home/.kube/config
+
+tool:
+  gradle:
+    installations:
+      - name: "Gradle-Wrapper"
+        home: ""
+        properties:
+          - installSource:
+              installers:
+                - gradleInstaller:
+                    id: "8.7"
+
+  nodejs:
+    installations:
+      - name: "Node-20"
+        properties:
+          - installSource:
+              installers:
+                - nodeJSInstaller:
+                    id: "20.14.0"
+
+jobs:
+  - script: >
+      multibranchPipelineJob('circleguard-auth-service') {
+        description('Auth Service CI/CD Pipeline')
+        branchSources {
+          filesystem {
+            id('circleguard-auth-local')
+            rootPath('/workspace/circle-guard-public')
+          }
+        }
+        factory {
+          workflowBranchProjectFactory {
+            scriptPath('services/circleguard-auth-service/Jenkinsfile')
+          }
+        }
+        triggers {
+          periodic(1)
+        }
+      }
+  - script: >
+      pipelineJob('circleguard-identity-service') {
+        description('Identity Service CI/CD Pipeline')
+        definition {
+          cpsScm {
+            scm {
+              filesystem('/workspace/circle-guard-public')
+            }
+            scriptPath('services/circleguard-identity-service/Jenkinsfile')
+            lightweight(true)
+          }
+        }
+      }
+  - script: >
+      pipelineJob('circleguard-form-service') {
+        description('Form Service CI/CD Pipeline')
+        definition {
+          cpsScm {
+            scm {
+              filesystem('/workspace/circle-guard-public')
+            }
+            scriptPath('services/circleguard-form-service/Jenkinsfile')
+            lightweight(true)
+          }
+        }
+      }
+  - script: >
+      pipelineJob('circleguard-promotion-service') {
+        description('Promotion Service CI/CD Pipeline')
+        definition {
+          cpsScm {
+            scm {
+              filesystem('/workspace/circle-guard-public')
+            }
+            scriptPath('services/circleguard-promotion-service/Jenkinsfile')
+            lightweight(true)
+          }
+        }
+      }
+  - script: >
+      pipelineJob('circleguard-notification-service') {
+        description('Notification Service CI/CD Pipeline')
+        definition {
+          cpsScm {
+            scm {
+              filesystem('/workspace/circle-guard-public')
+            }
+            scriptPath('services/circleguard-notification-service/Jenkinsfile')
+            lightweight(true)
+          }
+        }
+      }
+  - script: >
+      pipelineJob('circleguard-dashboard-service') {
+        description('Dashboard Service CI/CD Pipeline')
+        definition {
+          cpsScm {
+            scm {
+              filesystem('/workspace/circle-guard-public')
+            }
+            scriptPath('services/circleguard-dashboard-service/Jenkinsfile')
+            lightweight(true)
+          }
+        }
+      }
+
+unclassified:
+  location:
+    url: http://localhost:8080/
+  timestamper:
+    allPipelines: true
+  ansiColorBuildWrapper:
+    globalColorMapName: xterm

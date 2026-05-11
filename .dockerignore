@@ -1,0 +1,10 @@
+.git
+.gradle
+**/build/
+**/node_modules/
+mobile/
+design-assets/
+docs/
+ci/jenkins/jenkins_home/
+**/*.log
+**/.DS_Store

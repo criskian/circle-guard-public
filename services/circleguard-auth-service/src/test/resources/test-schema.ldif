@@ -1,0 +1,19 @@
+dn: dc=circleguard,dc=edu
+objectClass: top
+objectClass: domain
+dc: circleguard
+
+dn: ou=people,dc=circleguard,dc=edu
+objectClass: top
+objectClass: organizationalUnit
+ou: people
+
+dn: uid=testuser,ou=people,dc=circleguard,dc=edu
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+uid: testuser
+cn: Test User
+sn: User
+userPassword: {SHA}W6ph5Mm5Pz8GgiULbPgzG37mj9g=

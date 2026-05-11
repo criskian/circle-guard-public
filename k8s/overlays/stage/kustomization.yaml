@@ -1,0 +1,28 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: circleguard-stage
+
+resources:
+  - ../../base/00-namespaces.yaml
+  - ../../base/01-secrets.yaml
+  - ../../base/02-configmaps.yaml
+  - ../../base/10-infrastructure.yaml
+  - ../../base/20-services.yaml
+
+commonLabels:
+  environment: stage
+
+images:
+  - name: circleguard-auth-service
+    newTag: stage-latest
+  - name: circleguard-identity-service
+    newTag: stage-latest
+  - name: circleguard-form-service
+    newTag: stage-latest
+  - name: circleguard-promotion-service
+    newTag: stage-latest
+  - name: circleguard-notification-service
+    newTag: stage-latest
+  - name: circleguard-dashboard-service
+    newTag: stage-latest

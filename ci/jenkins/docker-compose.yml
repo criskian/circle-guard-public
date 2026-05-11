@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  jenkins:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: circleguard-jenkins
+    image: circleguard-jenkins:latest
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    environment:
+      - JAVA_OPTS=-Djenkins.install.runSetupWizard=false -Dhudson.model.DirectoryBrowserSupport.CSP=
+      - CASC_JENKINS_CONFIG=/var/jenkins_home/casc.yaml
+    volumes:
+      # Persistent Jenkins home
+      - jenkins_home:/var/jenkins_home
+      # Docker socket for Docker-outside-Docker
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Project source mounted for local SCM
+      - type: bind
+        source: ${CIRCLE_GUARD_REPO:-C:/Users/ljvid/Downloads/circle-guard-public}
+        target: /workspace/circle-guard-public
+        read_only: false
+      # CasC config
+      - ./casc.yaml:/var/jenkins_home/casc.yaml:ro
+      # kubeconfig for kubectl in pipelines
+      - type: bind
+        source: ${USERPROFILE:-~}/.kube
+        target: /var/jenkins_home/.kube
+        read_only: true
+    group_add:
+      - "docker"
+    restart: unless-stopped
+
+volumes:
+  jenkins_home:

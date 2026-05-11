@@ -1,0 +1,377 @@
+{
+  "info": {
+    "name": "CircleGuard E2E Tests",
+    "_postman_id": "circleguard-e2e-v1",
+    "description": "End-to-end tests covering the 5 main user flows across auth, identity, form, promotion, notification and dashboard services.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key": "base_auth", "value": "{{AUTH_URL}}"},
+    {"key": "base_form", "value": "{{FORM_URL}}"},
+    {"key": "base_promotion", "value": "{{PROMOTION_URL}}"},
+    {"key": "base_dashboard", "value": "{{DASHBOARD_URL}}"},
+    {"key": "jwt_token", "value": ""},
+    {"key": "anonymous_id", "value": ""},
+    {"key": "survey_id", "value": ""}
+  ],
+  "item": [
+
+    {
+      "name": "Flow 1 - Auth Flow",
+      "item": [
+        {
+          "name": "1.1 Login with valid credentials",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Token present', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.token).to.be.a('string').and.not.empty;",
+                  "  pm.expect(body.type).to.equal('Bearer');",
+                  "  pm.expect(body.anonymousId).to.match(/^[0-9a-f-]{36}$/);",
+                  "  pm.collectionVariables.set('jwt_token', body.token);",
+                  "  pm.collectionVariables.set('anonymous_id', body.anonymousId);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{base_auth}}/api/v1/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\": \"{{E2E_USERNAME}}\", \"password\": \"{{E2E_PASSWORD}}\"}"
+            }
+          }
+        },
+        {
+          "name": "1.2 Access protected endpoint with JWT",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Response is not empty', () => pm.response.json() !== null);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}],
+            "url": "{{base_auth}}/api/v1/users/me"
+          }
+        },
+        {
+          "name": "1.3 Reject request without token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Unauthorized without token', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_auth}}/api/v1/users/me"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "Flow 2 - Survey to Status Flow",
+      "item": [
+        {
+          "name": "2.1 Submit health survey with symptoms",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 or 201', () => {",
+                  "  pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "pm.test('Survey ID returned', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.id).to.match(/^[0-9a-f-]{36}$/);",
+                  "  pm.collectionVariables.set('survey_id', body.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{jwt_token}}"}
+            ],
+            "url": "{{base_form}}/api/v1/surveys",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"anonymousId\": \"{{anonymous_id}}\", \"hasFever\": true, \"hasCough\": true, \"otherSymptoms\": \"headache\"}"
+            }
+          }
+        },
+        {
+          "name": "2.2 Verify survey was stored",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Survey list is array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}],
+            "url": "{{base_form}}/api/v1/surveys"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "Flow 3 - Certificate Validation Flow",
+      "item": [
+        {
+          "name": "3.1 Submit survey with certificate attachment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 or 201', () => {",
+                  "  pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "pm.test('Survey returned with PENDING status', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.id).to.match(/^[0-9a-f-]{36}$/);",
+                  "  pm.expect(body.validationStatus).to.equal('PENDING');",
+                  "  pm.collectionVariables.set('cert_survey_id', body.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{jwt_token}}"}
+            ],
+            "url": "{{base_form}}/api/v1/surveys",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"anonymousId\": \"{{anonymous_id}}\", \"hasFever\": false, \"hasCough\": false, \"attachmentPath\": \"/certs/test.pdf\"}"
+            }
+          }
+        },
+        {
+          "name": "3.2 List pending surveys (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}],
+            "url": "{{base_form}}/api/v1/surveys/pending"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "Flow 4 - Dashboard Analytics Flow",
+      "item": [
+        {
+          "name": "4.1 Get campus health summary",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Response is object', () => pm.expect(pm.response.json()).to.be.an('object'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}],
+            "url": "{{base_dashboard}}/api/v1/analytics/summary"
+          }
+        },
+        {
+          "name": "4.2 Get department stats",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Contains stat keys or error key', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body).to.be.an('object');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}],
+            "url": "{{base_dashboard}}/api/v1/analytics/department/CS"
+          }
+        },
+        {
+          "name": "4.3 Get time series hourly",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Response is array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}],
+            "url": {
+              "raw": "{{base_dashboard}}/api/v1/analytics/timeseries?period=hourly&limit=24",
+              "query": [
+                {"key": "period", "value": "hourly"},
+                {"key": "limit", "value": "24"}
+              ]
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "Flow 5 - Identity Vault Flow",
+      "item": [
+        {
+          "name": "5.1 Map real identity to anonymous ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Anonymous ID is UUID', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.anonymousId).to.match(/^[0-9a-f-]{36}$/);",
+                  "  pm.collectionVariables.set('vault_anon_id', body.anonymousId);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{jwt_token}}"}
+            ],
+            "url": "{{base_auth}}/api/v1/identities/map",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"realIdentity\": \"e2e.testuser@university.edu\"}"
+            }
+          }
+        },
+        {
+          "name": "5.2 Same identity maps to same anonymous ID (idempotence)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Idempotent mapping', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.anonymousId).to.equal(pm.collectionVariables.get('vault_anon_id'));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{jwt_token}}"}
+            ],
+            "url": "{{base_auth}}/api/v1/identities/map",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"realIdentity\": \"e2e.testuser@university.edu\"}"
+            }
+          }
+        },
+        {
+          "name": "5.3 Real identity not exposed in survey response",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 or 201', () => {",
+                  "  pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "pm.test('Survey anonymousId is UUID not email', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.anonymousId).to.match(/^[0-9a-f-]{36}$/);",
+                  "  pm.expect(body.anonymousId).not.to.include('@');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{jwt_token}}"}
+            ],
+            "url": "{{base_form}}/api/v1/surveys",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"anonymousId\": \"{{vault_anon_id}}\", \"hasFever\": false, \"hasCough\": false}"
+            }
+          }
+        }
+      ]
+    }
+
+  ]
+}

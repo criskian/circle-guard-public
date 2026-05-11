@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: circleguard-stage
+  labels:
+    app.kubernetes.io/managed-by: circleguard-ci
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: circleguard-prod
+  labels:
+    app.kubernetes.io/managed-by: circleguard-ci

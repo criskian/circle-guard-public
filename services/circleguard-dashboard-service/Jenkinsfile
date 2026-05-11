@@ -1,0 +1,124 @@
+pipeline {
+    agent any
+    options {
+        timestamps()
+        ansiColor('xterm')
+        timeout(time: 30, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+    }
+    parameters {
+        choice(name: 'ENVIRONMENT', choices: ['dev', 'stage', 'master'],
+               description: 'Target deployment environment')
+    }
+    environment {
+        SERVICE     = 'circleguard-dashboard-service'
+        SHORT_NAME  = 'dashboard'
+        PORT        = '8084'
+        REPO_ROOT   = '/workspace/circle-guard-public'
+        IMAGE_TAG   = 'dashboard-${BUILD_NUMBER}'
+        GRADLE_OPTS = '-Xmx512m -Dfile.encoding=UTF-8'
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                dir("${REPO_ROOT}") { sh 'git log -1 --oneline' }
+            }
+        }
+        stage('Build') {
+            steps {
+                dir("${REPO_ROOT}") {
+                    sh './gradlew :services:circleguard-dashboard-service:bootJar --no-daemon -x test'
+                }
+            }
+        }
+        stage('Unit Tests') {
+            steps {
+                dir("${REPO_ROOT}") {
+                    sh './gradlew :services:circleguard-dashboard-service:test --no-daemon'
+                }
+            }
+            post {
+                always {
+                    junit testResults: 'services/circleguard-dashboard-service/build/test-results/test/**/*.xml',
+                          allowEmptyResults: true
+                    publishHTML target: [
+                        allowMissing: true,
+                        reportDir:   'services/circleguard-dashboard-service/build/reports/tests/test',
+                        reportFiles: 'index.html',
+                        reportName:  'Dashboard Unit Test Report'
+                    ]
+                }
+            }
+        }
+        stage('Docker Build') {
+            steps {
+                dir("${REPO_ROOT}") {
+                    sh """
+                        docker build -f services/circleguard-dashboard-service/Dockerfile                           -t circleguard-dashboard-service:${IMAGE_TAG}                           -t circleguard-dashboard-service:latest .
+                    """
+                }
+            }
+        }
+        stage('Deploy Dev') {
+            when { expression { params.ENVIRONMENT == 'dev' } }
+            steps {
+                dir("${REPO_ROOT}") {
+                    sh 'docker compose -f docker-compose.dev.yml up -d --no-deps --build dashboard-service || true'
+                }
+            }
+        }
+        stage('Deploy Stage') {
+            when { expression { params.ENVIRONMENT in ['stage', 'master'] } }
+            steps {
+                dir("${REPO_ROOT}") {
+                    sh 'docker tag circleguard-dashboard-service:latest circleguard-dashboard-service:stage-latest'
+                    sh 'kubectl apply -k k8s/overlays/stage'
+                    sh 'kubectl rollout status deployment/dashboard-service -n circleguard-stage --timeout=120s || true'
+                }
+            }
+        }
+        stage('E2E Tests') {
+            when { expression { params.ENVIRONMENT in ['stage', 'master'] } }
+            steps {
+                dir("${REPO_ROOT}/tests/e2e") {
+                    sh """
+                        newman run circleguard-e2e.postman_collection.json                           --environment stage.env.json                           --reporters cli,junit,htmlextra                           --reporter-junit-export reports/e2e-dashboard-${BUILD_NUMBER}.xml                           --reporter-htmlextra-export reports/e2e-dashboard-${BUILD_NUMBER}.html                           --bail || true
+                    """
+                }
+            }
+            post {
+                always {
+                    junit testResults: 'tests/e2e/reports/*.xml', allowEmptyResults: true
+                }
+            }
+        }
+        stage('Promote Prod') {
+            when { expression { params.ENVIRONMENT == 'master' } }
+            steps {
+                dir("${REPO_ROOT}") {
+                    sh 'docker tag circleguard-dashboard-service:stage-latest circleguard-dashboard-service:prod-latest'
+                    sh 'kubectl apply -k k8s/overlays/prod'
+                    sh 'kubectl rollout status deployment/dashboard-service -n circleguard-prod --timeout=180s || true'
+                }
+            }
+        }
+        stage('Release Notes') {
+            when { expression { params.ENVIRONMENT == 'master' } }
+            steps {
+                dir("${REPO_ROOT}") {
+                    sh "pwsh -File ci/scripts/generate-release-notes.ps1 -Service circleguard-dashboard-service -BuildNumber ${BUILD_NUMBER} || true"
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'RELEASE_NOTES_*.md,CHANGELOG.md', allowEmptyArchive: true
+                }
+            }
+        }
+    }
+    post {
+        always {
+            cleanWs cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true
+        }
+    }
+}

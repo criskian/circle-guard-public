@@ -1,0 +1,124 @@
+pipeline {
+    agent any
+    options {
+        timestamps()
+        ansiColor('xterm')
+        timeout(time: 30, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+    }
+    parameters {
+        choice(name: 'ENVIRONMENT', choices: ['dev', 'stage', 'master'],
+               description: 'Target deployment environment')
+    }
+    environment {
+        SERVICE     = 'circleguard-form-service'
+        SHORT_NAME  = 'form'
+        PORT        = '8086'
+        REPO_ROOT   = '/workspace/circle-guard-public'
+        IMAGE_TAG   = 'form-${BUILD_NUMBER}'
+        GRADLE_OPTS = '-Xmx512m -Dfile.encoding=UTF-8'
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                dir("${REPO_ROOT}") { sh 'git log -1 --oneline' }
+            }
+        }
+        stage('Build') {
+            steps {
+                dir("${REPO_ROOT}") {
+                    sh './gradlew :services:circleguard-form-service:bootJar --no-daemon -x test'
+                }
+            }
+        }
+        stage('Unit Tests') {
+            steps {
+                dir("${REPO_ROOT}") {
+                    sh './gradlew :services:circleguard-form-service:test --no-daemon'
+                }
+            }
+            post {
+                always {
+                    junit testResults: 'services/circleguard-form-service/build/test-results/test/**/*.xml',
+                          allowEmptyResults: true
+                    publishHTML target: [
+                        allowMissing: true,
+                        reportDir:   'services/circleguard-form-service/build/reports/tests/test',
+                        reportFiles: 'index.html',
+                        reportName:  'Form Unit Test Report'
+                    ]
+                }
+            }
+        }
+        stage('Docker Build') {
+            steps {
+                dir("${REPO_ROOT}") {
+                    sh """
+                        docker build -f services/circleguard-form-service/Dockerfile                           -t circleguard-form-service:${IMAGE_TAG}                           -t circleguard-form-service:latest .
+                    """
+                }
+            }
+        }
+        stage('Deploy Dev') {
+            when { expression { params.ENVIRONMENT == 'dev' } }
+            steps {
+                dir("${REPO_ROOT}") {
+                    sh 'docker compose -f docker-compose.dev.yml up -d --no-deps --build form-service || true'
+                }
+            }
+        }
+        stage('Deploy Stage') {
+            when { expression { params.ENVIRONMENT in ['stage', 'master'] } }
+            steps {
+                dir("${REPO_ROOT}") {
+                    sh 'docker tag circleguard-form-service:latest circleguard-form-service:stage-latest'
+                    sh 'kubectl apply -k k8s/overlays/stage'
+                    sh 'kubectl rollout status deployment/form-service -n circleguard-stage --timeout=120s || true'
+                }
+            }
+        }
+        stage('E2E Tests') {
+            when { expression { params.ENVIRONMENT in ['stage', 'master'] } }
+            steps {
+                dir("${REPO_ROOT}/tests/e2e") {
+                    sh """
+                        newman run circleguard-e2e.postman_collection.json                           --environment stage.env.json                           --reporters cli,junit,htmlextra                           --reporter-junit-export reports/e2e-form-${BUILD_NUMBER}.xml                           --reporter-htmlextra-export reports/e2e-form-${BUILD_NUMBER}.html                           --bail || true
+                    """
+                }
+            }
+            post {
+                always {
+                    junit testResults: 'tests/e2e/reports/*.xml', allowEmptyResults: true
+                }
+            }
+        }
+        stage('Promote Prod') {
+            when { expression { params.ENVIRONMENT == 'master' } }
+            steps {
+                dir("${REPO_ROOT}") {
+                    sh 'docker tag circleguard-form-service:stage-latest circleguard-form-service:prod-latest'
+                    sh 'kubectl apply -k k8s/overlays/prod'
+                    sh 'kubectl rollout status deployment/form-service -n circleguard-prod --timeout=180s || true'
+                }
+            }
+        }
+        stage('Release Notes') {
+            when { expression { params.ENVIRONMENT == 'master' } }
+            steps {
+                dir("${REPO_ROOT}") {
+                    sh "pwsh -File ci/scripts/generate-release-notes.ps1 -Service circleguard-form-service -BuildNumber ${BUILD_NUMBER} || true"
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'RELEASE_NOTES_*.md,CHANGELOG.md', allowEmptyArchive: true
+                }
+            }
+        }
+    }
+    post {
+        always {
+            cleanWs cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true
+        }
+    }
+}
