@@ -3,17 +3,20 @@ package com.circleguard.auth.controller;
 import com.circleguard.auth.client.IdentityClient;
 import com.circleguard.auth.service.JwtTokenService;
 import com.circleguard.auth.service.CustomUserDetailsService;
-import com.circleguard.auth.security.SecurityConfig;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.annotation.Import;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.UUID;
@@ -22,8 +25,18 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(LoginController.class)
-@Import(SecurityConfig.class)
+@Import(LoginControllerTest.TestSecurityConfig.class)
 public class LoginControllerTest {
+
+    @TestConfiguration
+    static class TestSecurityConfig {
+        @Bean
+        SecurityFilterChain testChain(HttpSecurity http) throws Exception {
+            http.csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+            return http.build();
+        }
+    }
 
     @Autowired
     private MockMvc mockMvc;
@@ -40,10 +53,12 @@ public class LoginControllerTest {
     @MockBean
     private CustomUserDetailsService userDetailsService;
 
+    @MockBean
+    private com.circleguard.auth.security.JwtAuthenticationFilter jwtAuthenticationFilter;
+
     @Test
     void shouldLoginSuccessfullyAndReturnAnonymizedToken() throws Exception {
         String username = "testuser";
-        String password = "password123";
         UUID anonymousId = UUID.randomUUID();
         String token = "mock-jwt-token";
 
