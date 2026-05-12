@@ -34,7 +34,7 @@ pipeline {
         stage('Unit Tests') {
             steps {
                 dir("${REPO_ROOT}") {
-                    sh './gradlew :services:circleguard-dashboard-service:test --no-daemon'
+                    sh './gradlew :services:circleguard-dashboard-service:test --no-daemon --info'
                 }
             }
             post {
@@ -53,7 +53,7 @@ pipeline {
         stage('Integration Tests') {
             steps {
                 dir("${REPO_ROOT}") {
-                    sh './gradlew :services:circleguard-dashboard-service:integrationTest --no-daemon'
+                    sh './gradlew :services:circleguard-dashboard-service:integrationTest --no-daemon --info'
                 }
             }
             post {
