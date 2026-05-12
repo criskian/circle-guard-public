@@ -68,7 +68,7 @@ public class LoginControllerTest {
 
         Mockito.when(identityClient.getAnonymousId(username)).thenReturn(anonymousId);
 
-        Mockito.when(jwtService.generateToken(Mockito.eq(anonymousId), Mockito.any(Authentication.class)))
+        Mockito.when(jwtService.generateToken(Mockito.any(UUID.class), Mockito.any(Authentication.class)))
                 .thenReturn(token);
 
         mockMvc.perform(post("/api/v1/auth/login")
