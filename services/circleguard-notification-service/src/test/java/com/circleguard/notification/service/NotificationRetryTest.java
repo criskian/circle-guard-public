@@ -27,6 +27,12 @@ public class NotificationRetryTest {
     @MockBean
     private KafkaTemplate<String, Object> kafkaTemplate;
 
+    @MockBean
+    private PushService pushService;
+
+    @MockBean
+    private SmsService smsService;
+
     @Test
     void testEmailRetryLogic() throws Exception {
         // Force failure for all attempts
