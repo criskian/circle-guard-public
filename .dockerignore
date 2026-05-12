@@ -1,6 +1,5 @@
-.git
+﻿.git
 .gradle
-**/build/
 **/node_modules/
 mobile/
 design-assets/

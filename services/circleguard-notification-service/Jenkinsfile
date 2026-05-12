@@ -14,7 +14,7 @@ pipeline {
         SERVICE     = 'circleguard-notification-service'
         SHORT_NAME  = 'notification'
         PORT        = '8082'
-        REPO_ROOT   = '/workspace/circle-guard-public'
+        REPO_ROOT    = "${WORKSPACE}"
         IMAGE_TAG   = 'notification-${BUILD_NUMBER}'
         GRADLE_OPTS = '-Xmx512m -Dfile.encoding=UTF-8'
     }

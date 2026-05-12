@@ -14,7 +14,7 @@ pipeline {
         SERVICE     = 'circleguard-promotion-service'
         SHORT_NAME  = 'promotion'
         PORT        = '8088'
-        REPO_ROOT   = '/workspace/circle-guard-public'
+        REPO_ROOT    = "${WORKSPACE}"
         IMAGE_TAG   = 'promotion-${BUILD_NUMBER}'
         GRADLE_OPTS = '-Xmx512m -Dfile.encoding=UTF-8'
     }

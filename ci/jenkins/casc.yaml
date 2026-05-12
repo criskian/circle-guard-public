@@ -46,21 +46,19 @@ tool:
 
 jobs:
   - script: >
-      multibranchPipelineJob('circleguard-auth-service') {
+      pipelineJob('circleguard-auth-service') {
         description('Auth Service CI/CD Pipeline')
-        branchSources {
-          filesystem {
-            id('circleguard-auth-local')
-            rootPath('/workspace/circle-guard-public')
-          }
-        }
-        factory {
-          workflowBranchProjectFactory {
+        definition {
+          cpsScm {
+            scm {
+              git {
+                remote { url('file:///workspace/circle-guard-public') }
+                branch('*/master')
+              }
+            }
             scriptPath('services/circleguard-auth-service/Jenkinsfile')
+            lightweight(false)
           }
-        }
-        triggers {
-          periodic(1)
         }
       }
   - script: >
@@ -69,10 +67,13 @@ jobs:
         definition {
           cpsScm {
             scm {
-              filesystem('/workspace/circle-guard-public')
+              git {
+                remote { url('file:///workspace/circle-guard-public') }
+                branch('*/master')
+              }
             }
             scriptPath('services/circleguard-identity-service/Jenkinsfile')
-            lightweight(true)
+            lightweight(false)
           }
         }
       }
@@ -82,10 +83,13 @@ jobs:
         definition {
           cpsScm {
             scm {
-              filesystem('/workspace/circle-guard-public')
+              git {
+                remote { url('file:///workspace/circle-guard-public') }
+                branch('*/master')
+              }
             }
             scriptPath('services/circleguard-form-service/Jenkinsfile')
-            lightweight(true)
+            lightweight(false)
           }
         }
       }
@@ -95,10 +99,13 @@ jobs:
         definition {
           cpsScm {
             scm {
-              filesystem('/workspace/circle-guard-public')
+              git {
+                remote { url('file:///workspace/circle-guard-public') }
+                branch('*/master')
+              }
             }
             scriptPath('services/circleguard-promotion-service/Jenkinsfile')
-            lightweight(true)
+            lightweight(false)
           }
         }
       }
@@ -108,10 +115,13 @@ jobs:
         definition {
           cpsScm {
             scm {
-              filesystem('/workspace/circle-guard-public')
+              git {
+                remote { url('file:///workspace/circle-guard-public') }
+                branch('*/master')
+              }
             }
             scriptPath('services/circleguard-notification-service/Jenkinsfile')
-            lightweight(true)
+            lightweight(false)
           }
         }
       }
@@ -121,10 +131,13 @@ jobs:
         definition {
           cpsScm {
             scm {
-              filesystem('/workspace/circle-guard-public')
+              git {
+                remote { url('file:///workspace/circle-guard-public') }
+                branch('*/master')
+              }
             }
             scriptPath('services/circleguard-dashboard-service/Jenkinsfile')
-            lightweight(true)
+            lightweight(false)
           }
         }
       }

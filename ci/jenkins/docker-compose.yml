@@ -11,7 +11,7 @@ services:
       - "8080:8080"
       - "50000:50000"
     environment:
-      - JAVA_OPTS=-Djenkins.install.runSetupWizard=false -Dhudson.model.DirectoryBrowserSupport.CSP=
+      - JAVA_OPTS=-Djenkins.install.runSetupWizard=false -Dhudson.model.DirectoryBrowserSupport.CSP= -Dhudson.plugins.git.GitSCM.ALLOW_LOCAL_CHECKOUT=true
       - CASC_JENKINS_CONFIG=/var/jenkins_home/casc.yaml
     volumes:
       # Persistent Jenkins home
@@ -30,8 +30,6 @@ services:
         source: ${USERPROFILE:-~}/.kube
         target: /var/jenkins_home/.kube
         read_only: true
-    group_add:
-      - "docker"
     restart: unless-stopped
 
 volumes:

@@ -14,7 +14,7 @@ pipeline {
         SERVICE     = 'circleguard-dashboard-service'
         SHORT_NAME  = 'dashboard'
         PORT        = '8084'
-        REPO_ROOT   = '/workspace/circle-guard-public'
+        REPO_ROOT    = "${WORKSPACE}"
         IMAGE_TAG   = 'dashboard-${BUILD_NUMBER}'
         GRADLE_OPTS = '-Xmx512m -Dfile.encoding=UTF-8'
     }

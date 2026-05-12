@@ -3,11 +3,18 @@ package com.circleguard.promotion.performance;
 import com.circleguard.promotion.service.HealthStatusService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.neo4j.core.Neo4jClient;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.containers.Neo4jContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -18,6 +25,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @Testcontainers(disabledWithoutDocker = true)
+@ActiveProfiles("test")
+@TestPropertySource(properties = {
+        "spring.datasource.url=jdbc:h2:mem:promo_perf_test;DB_CLOSE_DELAY=-1",
+        "spring.datasource.driver-class-name=org.h2.Driver",
+        "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
+        "spring.jpa.hibernate.ddl-auto=create-drop",
+        "spring.flyway.enabled=false"
+})
 public class PromotionPerformanceTest {
 
     @Container
@@ -34,8 +49,11 @@ public class PromotionPerformanceTest {
     @Autowired
     private HealthStatusService healthStatusService;
     
-    @org.springframework.boot.test.mock.mockito.MockBean
-    private org.springframework.kafka.core.KafkaTemplate<String, Object> kafkaTemplate;
+    @MockBean
+    private KafkaTemplate<String, Object> kafkaTemplate;
+
+    @MockBean
+    private StringRedisTemplate redisTemplate;
 
     @Autowired
     private Neo4jClient neo4jClient;
@@ -44,6 +62,10 @@ public class PromotionPerformanceTest {
 
     @BeforeEach
     void setupBenchmarkData() {
+        @SuppressWarnings("unchecked")
+        ValueOperations<String, String> valueOps = Mockito.mock(ValueOperations.class);
+        Mockito.lenient().when(redisTemplate.opsForValue()).thenReturn(valueOps);
+
         // Clear graph
         neo4jClient.query("MATCH (n) DETACH DELETE n").run();
 

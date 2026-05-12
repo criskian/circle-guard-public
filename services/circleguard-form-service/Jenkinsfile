@@ -14,7 +14,7 @@ pipeline {
         SERVICE     = 'circleguard-form-service'
         SHORT_NAME  = 'form'
         PORT        = '8086'
-        REPO_ROOT   = '/workspace/circle-guard-public'
+        REPO_ROOT    = "${WORKSPACE}"
         IMAGE_TAG   = 'form-${BUILD_NUMBER}'
         GRADLE_OPTS = '-Xmx512m -Dfile.encoding=UTF-8'
     }

@@ -1,4 +1,4 @@
-plugins {
+﻿plugins {
     id("org.springframework.boot")
     id("io.spring.dependency-management")
     kotlin("jvm")
@@ -10,6 +10,7 @@ dependencies {
     testImplementation(platform("org.springframework.boot:spring-boot-dependencies:3.2.4"))
 
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.kafka:spring-kafka")
     implementation("org.springframework.boot:spring-boot-starter-mail")
     implementation("com.twilio.sdk:twilio:10.1.1")

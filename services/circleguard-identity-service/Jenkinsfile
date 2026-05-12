@@ -14,7 +14,7 @@ pipeline {
         SERVICE     = 'circleguard-identity-service'
         SHORT_NAME  = 'identity'
         PORT        = '8083'
-        REPO_ROOT   = '/workspace/circle-guard-public'
+        REPO_ROOT    = "${WORKSPACE}"
         IMAGE_TAG   = 'identity-${BUILD_NUMBER}'
         GRADLE_OPTS = '-Xmx512m -Dfile.encoding=UTF-8'
     }

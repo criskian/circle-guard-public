@@ -39,3 +39,7 @@ RUN jenkins-plugin-cli --plugin-file /usr/share/jenkins/ref/plugins.txt
 
 # Configuration as Code
 ENV CASC_JENKINS_CONFIG=/var/jenkins_home/casc.yaml
+
+# Allow git to operate on the mounted workspace regardless of ownership
+RUN git config --global --add safe.directory /workspace/circle-guard-public && \
+    git config --global --add safe.directory '*'
