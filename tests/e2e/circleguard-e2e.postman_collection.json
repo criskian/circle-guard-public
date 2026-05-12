@@ -264,13 +264,7 @@
           "request": {
             "method": "GET",
             "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}],
-            "url": {
-              "raw": "{{base_dashboard}}/api/v1/analytics/timeseries?period=hourly&limit=24",
-              "query": [
-                {"key": "period", "value": "hourly"},
-                {"key": "limit", "value": "24"}
-              ]
-            }
+            "url": "{{base_dashboard}}/api/v1/analytics/timeseries?period=hourly&limit=24"
           }
         }
       ]

@@ -96,6 +96,7 @@ services:
       LDAP_ORGANISATION: "CircleGuard"
       LDAP_DOMAIN: "circleguard.edu"
       LDAP_ADMIN_PASSWORD: "admin"
+      LDAP_REMOVE_CONFIG_AFTER_SETUP: "false"
     volumes:
       - ./ci/ldap:/container/service/slapd/assets/config/bootstrap/ldif/custom
 
