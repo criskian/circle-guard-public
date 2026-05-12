@@ -40,7 +40,8 @@ import static org.assertj.core.api.Assertions.*;
         "spring.jpa.hibernate.ddl-auto=create-drop",
         "spring.flyway.enabled=false",
         "spring.kafka.bootstrap-servers=${spring.embedded.kafka.brokers}",
-        "spring.kafka.consumer.auto-offset-reset=earliest"
+        "spring.kafka.consumer.auto-offset-reset=earliest",
+        "spring.kafka.listener.auto-startup=true"
 })
 @DirtiesContext
 class FormKafkaIntegrationTest {
