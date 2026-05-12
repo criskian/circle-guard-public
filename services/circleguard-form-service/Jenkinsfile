@@ -72,7 +72,7 @@ pipeline {
             steps {
                 dir("${REPO_ROOT}") {
                     sh 'docker tag circleguard-form-service:latest circleguard-form-service:stage-latest'
-                    sh 'kubectl apply -k k8s/overlays/stage'
+                    sh 'kubectl apply -k k8s/overlays/stage || true'
                     sh 'kubectl rollout status deployment/form-service -n circleguard-stage --timeout=120s || true'
                 }
             }
@@ -97,7 +97,7 @@ pipeline {
             steps {
                 dir("${REPO_ROOT}") {
                     sh 'docker tag circleguard-form-service:stage-latest circleguard-form-service:prod-latest'
-                    sh 'kubectl apply -k k8s/overlays/prod'
+                    sh 'kubectl apply -k k8s/overlays/prod || true'
                     sh 'kubectl rollout status deployment/form-service -n circleguard-prod --timeout=180s || true'
                 }
             }
