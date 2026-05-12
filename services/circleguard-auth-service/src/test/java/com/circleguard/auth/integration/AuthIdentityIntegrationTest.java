@@ -49,7 +49,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "jwt.expiration=3600000",
         "qr.secret=test-qr-secret-key-minimum-256-bits-long-enough",
         "qr.expiration=60000",
-        "identity.service.url=http://localhost:18083"
+        "identity.service.url=http://localhost:18083",
+        "spring.ldap.urls=ldap://localhost:8389"
 })
 class AuthIdentityIntegrationTest {
 
