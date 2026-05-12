@@ -53,9 +53,6 @@ public class LoginControllerTest {
     @MockBean
     private CustomUserDetailsService userDetailsService;
 
-    @MockBean
-    private com.circleguard.auth.security.JwtAuthenticationFilter jwtAuthenticationFilter;
-
     @Test
     void shouldLoginSuccessfullyAndReturnAnonymizedToken() throws Exception {
         String username = "testuser";
