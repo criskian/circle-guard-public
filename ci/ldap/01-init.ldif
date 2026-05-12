@@ -1,0 +1,44 @@
+dn: ou=people,dc=circleguard,dc=edu
+objectClass: top
+objectClass: organizationalUnit
+ou: people
+
+dn: ou=groups,dc=circleguard,dc=edu
+objectClass: top
+objectClass: organizationalUnit
+ou: groups
+
+dn: uid=admin,ou=people,dc=circleguard,dc=edu
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+uid: admin
+cn: Admin User
+sn: Admin
+mail: admin@circleguard.edu
+userPassword: admin123
+
+dn: uid=testuser,ou=people,dc=circleguard,dc=edu
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+uid: testuser
+cn: Test User
+sn: User
+mail: testuser@circleguard.edu
+userPassword: password
+
+dn: cn=users,ou=groups,dc=circleguard,dc=edu
+objectClass: top
+objectClass: groupOfNames
+cn: users
+member: uid=admin,ou=people,dc=circleguard,dc=edu
+member: uid=testuser,ou=people,dc=circleguard,dc=edu
+
+dn: cn=admins,ou=groups,dc=circleguard,dc=edu
+objectClass: top
+objectClass: groupOfNames
+cn: admins
+member: uid=admin,ou=people,dc=circleguard,dc=edu

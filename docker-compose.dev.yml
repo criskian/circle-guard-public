@@ -96,6 +96,8 @@ services:
       LDAP_ORGANISATION: "CircleGuard"
       LDAP_DOMAIN: "circleguard.edu"
       LDAP_ADMIN_PASSWORD: "admin"
+    volumes:
+      - ./ci/ldap:/container/service/slapd/assets/config/bootstrap/ldif/custom
 
   # ─── MICROSERVICES ────────────────────────────────────────────────────────────
   auth-service:
