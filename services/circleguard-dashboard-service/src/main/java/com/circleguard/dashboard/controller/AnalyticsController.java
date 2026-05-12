@@ -33,7 +33,7 @@ public class AnalyticsController {
         return ResponseEntity.ok(analyticsService.getDepartmentStats(department));
     }
 
-    @GetMapping("/time-series")
+    @GetMapping({"/time-series", "/timeseries"})
     public ResponseEntity<List<Map<String, Object>>> getTimeSeries(
             @RequestParam(defaultValue = "hourly") String period,
             @RequestParam(defaultValue = "24") int limit) {
