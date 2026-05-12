@@ -24,9 +24,7 @@ PROMOTION_URL   = "http://localhost:8088"
 DASHBOARD_URL   = "http://localhost:8084"
 
 CREDENTIALS = [
-    {"username": "admin",   "password": "admin123"},
-    {"username": "health1", "password": "health123"},
-    {"username": "user1",   "password": "user123"},
+    {"username": "admin", "password": "admin123"},
 ]
 
 SYMPTOM_COMBOS = [
@@ -139,15 +137,14 @@ class HealthStatusTasks(TaskSet):
         )
 
     @task(1)
-    def report_health_status(self):
+    def get_circles(self):
         if not self.token:
             return
         anon_id = str(uuid.uuid4())
-        self.client.post(
-            f"{PROMOTION_URL}/api/v1/health/report",
-            json={"anonymousId": anon_id, "status": "SUSPECT"},
+        self.client.get(
+            f"{PROMOTION_URL}/api/v1/circles/user/{anon_id}",
             headers=self.auth_header(),
-            name="[promotion] POST /api/v1/health/report"
+            name="[promotion] GET /api/v1/circles/user/{id}"
         )
 
 

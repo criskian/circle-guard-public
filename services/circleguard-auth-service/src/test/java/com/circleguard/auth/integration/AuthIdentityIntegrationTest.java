@@ -4,6 +4,7 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * AuthenticationManager is mocked so the test does not depend on LDAP/DB availability.
  * IdentityClient is real (uses RestTemplate) and hits the WireMock stub.
  */
+@Tag("integration")
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestPropertySource(properties = {

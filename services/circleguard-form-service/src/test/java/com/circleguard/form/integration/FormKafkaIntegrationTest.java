@@ -4,6 +4,7 @@ import com.circleguard.form.model.HealthSurvey;
 import com.circleguard.form.model.ValidationStatus;
 import com.circleguard.form.service.HealthSurveyService;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,6 +26,7 @@ import static org.assertj.core.api.Assertions.*;
  * Integration test: validates that form-service publishes survey.submitted
  * and certificate.validated events to Kafka after survey actions.
  */
+@Tag("integration")
 @SpringBootTest
 @Import(FormKafkaIntegrationTest.KafkaTestListeners.class)
 @EmbeddedKafka(

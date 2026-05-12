@@ -50,6 +50,25 @@ pipeline {
                 }
             }
         }
+        stage('Integration Tests') {
+            steps {
+                dir("${REPO_ROOT}") {
+                    sh './gradlew :services:circleguard-promotion-service:integrationTest --no-daemon'
+                }
+            }
+            post {
+                always {
+                    junit testResults: 'services/circleguard-promotion-service/build/test-results/integrationTest/**/*.xml',
+                          allowEmptyResults: true
+                    publishHTML target: [
+                        allowMissing: true,
+                        reportDir:   'services/circleguard-promotion-service/build/reports/tests/integrationTest',
+                        reportFiles: 'index.html',
+                        reportName:  'Promotion Integration Test Report'
+                    ]
+                }
+            }
+        }
         stage('Docker Build') {
             steps {
                 dir("${REPO_ROOT}") {

@@ -50,6 +50,25 @@ pipeline {
                 }
             }
         }
+        stage('Integration Tests') {
+            steps {
+                dir("${REPO_ROOT}") {
+                    sh './gradlew :services:circleguard-identity-service:integrationTest --no-daemon'
+                }
+            }
+            post {
+                always {
+                    junit testResults: 'services/circleguard-identity-service/build/test-results/integrationTest/**/*.xml',
+                          allowEmptyResults: true
+                    publishHTML target: [
+                        allowMissing: true,
+                        reportDir:   'services/circleguard-identity-service/build/reports/tests/integrationTest',
+                        reportFiles: 'index.html',
+                        reportName:  'Identity Integration Test Report'
+                    ]
+                }
+            }
+        }
         stage('Docker Build') {
             steps {
                 dir("${REPO_ROOT}") {

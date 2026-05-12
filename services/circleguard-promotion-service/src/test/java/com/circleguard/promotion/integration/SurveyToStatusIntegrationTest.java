@@ -1,6 +1,7 @@
 package com.circleguard.promotion.integration;
 
 import com.circleguard.promotion.service.HealthStatusService;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,7 @@ import static org.mockito.Mockito.*;
  * Integration test: validates that survey.submitted Kafka events trigger
  * HealthStatusService.updateStatus(SUSPECT) inside promotion-service.
  */
+@Tag("integration")
 @SpringBootTest(properties = "spring.main.allow-bean-definition-overriding=true")
 @ActiveProfiles("test")
 @DirtiesContext
