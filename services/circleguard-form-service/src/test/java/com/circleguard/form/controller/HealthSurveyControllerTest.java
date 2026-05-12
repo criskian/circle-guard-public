@@ -1,6 +1,7 @@
 package com.circleguard.form.controller;
 
 import com.circleguard.form.model.HealthSurvey;
+import com.circleguard.form.repository.HealthSurveyRepository;
 import com.circleguard.form.service.HealthSurveyService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -23,6 +24,9 @@ class HealthSurveyControllerTest {
 
     @MockBean
     private HealthSurveyService surveyService;
+
+    @MockBean
+    private HealthSurveyRepository surveyRepository;
 
     @Test
     void shouldSubmitSurveySuccessfully() throws Exception {
