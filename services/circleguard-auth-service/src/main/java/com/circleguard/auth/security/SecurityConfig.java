@@ -31,7 +31,7 @@ public class SecurityConfig {
             .headers(headers -> headers.frameOptions(frame -> frame.disable()))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/v1/auth/login", "/api/v1/auth/qr/verify").permitAll()
-                .requestMatchers("/api/v1/auth/qr/generate").authenticated()
+                .requestMatchers("/api/v1/users/me", "/api/v1/auth/qr/generate").authenticated()
                 .anyRequest().permitAll())
             .addFilterBefore(jwtFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
         return http.build();
