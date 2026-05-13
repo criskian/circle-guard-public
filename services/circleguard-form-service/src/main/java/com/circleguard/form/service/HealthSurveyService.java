@@ -5,6 +5,7 @@ import com.circleguard.form.model.Questionnaire;
 import com.circleguard.form.model.ValidationStatus;
 import com.circleguard.form.repository.HealthSurveyRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +16,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class HealthSurveyService {
     private final HealthSurveyRepository repository;
     private final QuestionnaireService questionnaireService;
@@ -49,8 +51,10 @@ public class HealthSurveyService {
             "hasSymptoms", hasSymptoms,
             "timestamp", System.currentTimeMillis()
         );
+        log.info("[Kafka] Publishing survey.submitted event for anonymousId={} hasSymptoms={}", saved.getAnonymousId(), hasSymptoms);
         kafkaTemplate.send(TOPIC_SURVEY_SUBMITTED, saved.getAnonymousId().toString(), event);
-        
+        log.info("[Kafka] survey.submitted published successfully");
+
         return saved;
     }
 
@@ -75,7 +79,9 @@ public class HealthSurveyService {
                 "adminId", adminId,
                 "timestamp", System.currentTimeMillis()
             );
+            log.info("[Kafka] Publishing certificate.validated event for anonymousId={} status=APPROVED", survey.getAnonymousId());
             kafkaTemplate.send(TOPIC_CERTIFICATE_VALIDATED, survey.getAnonymousId().toString(), event);
+            log.info("[Kafka] certificate.validated published successfully");
         }
     }
 }

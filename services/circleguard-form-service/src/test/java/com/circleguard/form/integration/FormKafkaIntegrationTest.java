@@ -6,6 +6,8 @@ import com.circleguard.form.service.HealthSurveyService;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -84,16 +86,19 @@ class FormKafkaIntegrationTest {
     @TestConfiguration
     @Component
     static class KafkaTestListeners {
+        private static final Logger log = LoggerFactory.getLogger(KafkaTestListeners.class);
         volatile CountDownLatch surveyLatch = new CountDownLatch(1);
         volatile CountDownLatch certLatch = new CountDownLatch(1);
 
         @KafkaListener(topics = "survey.submitted", groupId = "form-test-group-survey")
         void onSurveySubmitted(ConsumerRecord<String, Object> record) {
+            log.info("[Kafka] Received survey.submitted event: key={} value={}", record.key(), record.value());
             surveyLatch.countDown();
         }
 
         @KafkaListener(topics = "certificate.validated", groupId = "form-test-group-cert")
         void onCertificateValidated(ConsumerRecord<String, Object> record) {
+            log.info("[Kafka] Received certificate.validated event: key={} value={}", record.key(), record.value());
             certLatch.countDown();
         }
     }

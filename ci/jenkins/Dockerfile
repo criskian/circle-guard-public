@@ -48,6 +48,9 @@ ENV CASC_JENKINS_CONFIG=/var/jenkins_home/casc.yaml
 RUN git config --global --add safe.directory /workspace/circle-guard-public && \
     git config --global --add safe.directory '*'
 
-# Run as root so entrypoint can chmod the Docker socket before starting Jenkins
+# Run as root so the pipeline can access the Docker socket (Docker Desktop for Windows)
 USER root
+# Configure git safe.directory for root (Jenkins runs as root in this setup)
+RUN git config --global --add safe.directory '*' && \
+    git config --global --add safe.directory /workspace/circle-guard-public
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
