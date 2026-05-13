@@ -6,7 +6,7 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-$repoRoot = "C:\Users\ljvid\Downloads\circle-guard-public"
+$repoRoot = "C:\Users\crist\OneDrive\Desktop\circle-guard-public"
 $jenkinDir = "$repoRoot\ci\jenkins"
 
 Write-Host "[1/3] Building Jenkins image..." -ForegroundColor Cyan

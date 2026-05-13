@@ -20,7 +20,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       # Project source mounted for local SCM
       - type: bind
-        source: ${CIRCLE_GUARD_REPO:-C:/Users/ljvid/Downloads/circle-guard-public}
+        source: ${CIRCLE_GUARD_REPO:-C:/Users/crist/OneDrive/Desktop/circle-guard-public}
         target: /workspace/circle-guard-public
         read_only: false
       # CasC config

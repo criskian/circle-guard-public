@@ -1,4 +1,3 @@
 #!/bin/bash
-# Fix docker socket permissions so jenkins user can access Docker
-chmod 666 /var/run/docker.sock 2>/dev/null || true
+# Run Jenkins as root so the pipeline can access the Docker socket (Docker Desktop for Windows)
 exec /usr/bin/tini -- /usr/local/bin/jenkins.sh "$@"

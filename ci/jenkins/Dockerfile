@@ -47,3 +47,7 @@ ENV CASC_JENKINS_CONFIG=/var/jenkins_home/casc.yaml
 # Allow git to operate on the mounted workspace regardless of ownership
 RUN git config --global --add safe.directory /workspace/circle-guard-public && \
     git config --global --add safe.directory '*'
+
+# Run as root so entrypoint can chmod the Docker socket before starting Jenkins
+USER root
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
