@@ -1,0 +1,4 @@
+Method,Name,Error,Occurrences,First Seen,Last Seen
+POST,[spike] login,"ConnectionResetError(10054, 'Se ha forzado la interrupción de una conexión existente por el host remoto', None, 10054, None)",42,2026-05-12T04:00:11Z,2026-05-12T04:00:15Z
+GET,[spike] get_stats,"ConnectionResetError(10054, 'Se ha forzado la interrupción de una conexión existente por el host remoto', None, 10054, None)",176,2026-05-12T04:00:13Z,2026-05-12T04:01:05Z
+POST,[spike] submit_survey,"ConnectionResetError(10054, 'Se ha forzado la interrupción de una conexión existente por el host remoto', None, 10054, None)",227,2026-05-12T04:00:12Z,2026-05-12T04:01:04Z

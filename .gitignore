@@ -17,6 +17,9 @@ build/
 target/
 **/target/
 
+# Claude Code
+.claude/
+
 # IDEs
 .idea/
 *.iml

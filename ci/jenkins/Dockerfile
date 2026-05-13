@@ -2,6 +2,10 @@ FROM jenkins/jenkins:lts-jdk21
 
 USER root
 
+# Fix Docker socket permissions at startup
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 # Docker CLI for Docker-outside-Docker
 RUN apt-get update && apt-get install -y \
     curl \
