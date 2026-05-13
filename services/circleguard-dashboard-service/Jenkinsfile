@@ -3,7 +3,7 @@ pipeline {
     options {
         timestamps()
         ansiColor('xterm')
-        timeout(time: 30, unit: 'MINUTES')
+        timeout(time: 60, unit: 'MINUTES')
         buildDiscarder(logRotator(numToKeepStr: '10'))
     }
     parameters {
@@ -27,14 +27,14 @@ pipeline {
         stage('Build') {
             steps {
                 dir("${REPO_ROOT}") {
-                    sh './gradlew :services:circleguard-dashboard-service:bootJar --no-daemon -x test'
+                    sh './gradlew :services:circleguard-dashboard-service:bootJar --no-daemon -x test --max-workers 1'
                 }
             }
         }
         stage('Unit Tests') {
             steps {
                 dir("${REPO_ROOT}") {
-                    sh './gradlew :services:circleguard-dashboard-service:test --no-daemon --info'
+                    sh './gradlew :services:circleguard-dashboard-service:test --no-daemon --info --max-workers 1'
                 }
             }
             post {
@@ -53,7 +53,7 @@ pipeline {
         stage('Integration Tests') {
             steps {
                 dir("${REPO_ROOT}") {
-                    sh './gradlew :services:circleguard-dashboard-service:integrationTest --no-daemon --info'
+                    sh './gradlew :services:circleguard-dashboard-service:integrationTest --no-daemon --info --max-workers 1'
                 }
             }
             post {

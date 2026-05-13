@@ -35,12 +35,16 @@ dependencies {
 }
 
 tasks.named<Test>("test") {
+    maxParallelForks = 1
+    jvmArgs("-Xmx384m")
     useJUnitPlatform { excludeTags("integration") }
 }
 
 tasks.register<Test>("integrationTest") {
     description = "Runs integration tests."
     group = "verification"
+    maxParallelForks = 1
+    jvmArgs("-Xmx384m")
     useJUnitPlatform { includeTags("integration") }
     testClassesDirs = sourceSets["test"].output.classesDirs
     classpath = sourceSets["test"].runtimeClasspath
