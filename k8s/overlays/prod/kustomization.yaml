@@ -4,7 +4,6 @@ kind: Kustomization
 namespace: circleguard-prod
 
 resources:
-  - ../../base/00-namespaces.yaml
   - ../../base/01-secrets.yaml
   - ../../base/02-configmaps.yaml
   - ../../base/10-infrastructure.yaml

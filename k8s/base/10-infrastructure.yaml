@@ -112,6 +112,7 @@ spec:
       labels:
         app: neo4j
     spec:
+      enableServiceLinks: false
       containers:
         - name: neo4j
           image: neo4j:5.26
@@ -203,6 +204,7 @@ spec:
       labels:
         app: kafka
     spec:
+      enableServiceLinks: false
       containers:
         - name: kafka
           image: confluentinc/cp-kafka:7.6.0

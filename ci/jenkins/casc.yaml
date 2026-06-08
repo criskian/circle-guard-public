@@ -1,6 +1,6 @@
 jenkins:
   systemMessage: "CircleGuard CI/CD — Taller 2 Ingeniería de Software"
-  numExecutors: 4
+  numExecutors: 6
   mode: NORMAL
 
   securityRealm:

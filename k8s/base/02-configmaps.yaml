@@ -11,7 +11,14 @@ data:
   NOTIFICATION_SERVICE_URL: "http://notification-service:8082"
   DASHBOARD_SERVICE_URL:  "http://dashboard-service:8084"
 
-  # Infrastructure
+  # Infrastructure (Spring Boot relaxed-binding names)
+  SPRING_KAFKA_BOOTSTRAP_SERVERS: "kafka:29092"
+  SPRING_DATA_REDIS_HOST:         "redis"
+  SPRING_DATA_REDIS_PORT:         "6379"
+  SPRING_NEO4J_URI:               "bolt://neo4j:7687"
+  SPRING_MAIL_HOST:               "mailhog"
+  SPRING_MAIL_PORT:               "1025"
+  # Legacy names kept for reference
   KAFKA_BOOTSTRAP_SERVERS: "kafka:29092"
   REDIS_HOST:              "redis"
   REDIS_PORT:              "6379"
@@ -31,8 +38,10 @@ metadata:
   name: postgres-init-script
 data:
   init-db.sql: |
-    CREATE DATABASE IF NOT EXISTS circleguard_auth;
-    CREATE DATABASE IF NOT EXISTS circleguard_identity;
-    CREATE DATABASE IF NOT EXISTS circleguard_form;
-    CREATE DATABASE IF NOT EXISTS circleguard_promotion;
-    CREATE DATABASE IF NOT EXISTS circleguard_dashboard;
+    -- PostgreSQL: CREATE DATABASE cannot use IF NOT EXISTS; use separate commands.
+    -- This script runs in the postgres user context on a fresh data dir.
+    CREATE DATABASE circleguard_auth;
+    CREATE DATABASE circleguard_identity;
+    CREATE DATABASE circleguard_form;
+    CREATE DATABASE circleguard_promotion;
+    CREATE DATABASE circleguard_dashboard;

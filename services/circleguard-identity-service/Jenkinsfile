@@ -91,7 +91,7 @@ pipeline {
             steps {
                 dir("${REPO_ROOT}") {
                     sh 'docker tag circleguard-identity-service:latest circleguard-identity-service:stage-latest'
-                    sh 'kubectl apply -k k8s/overlays/stage || true'
+                    sh 'kubectl kustomize k8s/overlays/stage --load-restrictor=LoadRestrictionsNone | kubectl apply -f - || true'
                     sh 'kubectl rollout status deployment/identity-service -n circleguard-stage --timeout=120s || true'
                 }
             }
@@ -116,7 +116,7 @@ pipeline {
             steps {
                 dir("${REPO_ROOT}") {
                     sh 'docker tag circleguard-identity-service:stage-latest circleguard-identity-service:prod-latest'
-                    sh 'kubectl apply -k k8s/overlays/prod || true'
+                    sh 'kubectl kustomize k8s/overlays/prod --load-restrictor=LoadRestrictionsNone | kubectl apply -f - || true'
                     sh 'kubectl rollout status deployment/identity-service -n circleguard-prod --timeout=180s || true'
                 }
             }
