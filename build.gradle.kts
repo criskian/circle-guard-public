@@ -4,6 +4,7 @@ plugins {
     kotlin("jvm") version "1.9.24" apply false
     kotlin("plugin.spring") version "1.9.24" apply false
     kotlin("plugin.jpa") version "1.9.24" apply false
+    id("org.sonarqube") version "5.0.0.4638"
 }
 
 allprojects {
@@ -15,9 +16,23 @@ allprojects {
     }
 }
 
+sonarqube {
+    properties {
+        property("sonar.host.url",     System.getenv("SONAR_HOST_URL") ?: "http://localhost:9000")
+        property("sonar.login",        System.getenv("SONAR_TOKEN") ?: "")
+        property("sonar.projectName",  "CircleGuard")
+        property("sonar.projectKey",   "circleguard")
+        property("sonar.sourceEncoding", "UTF-8")
+        property("sonar.coverage.jacoco.xmlReportPaths",
+                 "**/build/reports/jacoco/test/jacocoTestReport.xml")
+    }
+}
+
 subprojects {
     apply(plugin = "java")
     apply(plugin = "org.jetbrains.kotlin.jvm")
+    apply(plugin = "jacoco")
+    apply(plugin = "org.sonarqube")
     extensions.configure<JavaPluginExtension> {
         toolchain {
             languageVersion.set(JavaLanguageVersion.of(21))
@@ -45,5 +60,15 @@ subprojects {
 
     tasks.withType<Test> {
         useJUnitPlatform()
+    }
+
+    tasks.withType<org.gradle.testing.jacoco.tasks.JacocoReport> {
+        reports {
+            xml.required.set(true)
+            html.required.set(true)
+        }
+        executionData.from(
+            fileTree(layout.buildDirectory.dir("jacoco")) { include("*.exec") }
+        )
     }
 }

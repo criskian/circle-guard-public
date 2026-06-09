@@ -14,9 +14,10 @@ pipeline {
         SERVICE     = 'circleguard-identity-service'
         SHORT_NAME  = 'identity'
         PORT        = '8083'
-        REPO_ROOT    = "${WORKSPACE}"
-        IMAGE_TAG   = 'identity-${BUILD_NUMBER}'
+        REPO_ROOT   = "${WORKSPACE}"
+        IMAGE_TAG   = "identity-${BUILD_NUMBER}"
         GRADLE_OPTS = '-Xmx512m -Dfile.encoding=UTF-8'
+        SONAR_HOST  = 'http://sonarqube:9000'
     }
     stages {
         stage('Checkout') {
@@ -69,12 +70,76 @@ pipeline {
                 }
             }
         }
+        stage('Coverage') {
+            steps {
+                dir("${REPO_ROOT}") {
+                    sh './gradlew :services:circleguard-identity-service:jacocoTestReport --no-daemon --max-workers 1'
+                }
+            }
+            post {
+                always {
+                    jacoco execPattern: 'services/circleguard-identity-service/build/jacoco/*.exec',
+                           classPattern: 'services/circleguard-identity-service/build/classes/kotlin/main',
+                           sourcePattern: 'services/circleguard-identity-service/src/main/kotlin',
+                           minimumLineCoverage: '60',
+                           changeBuildStatus: false
+                    publishHTML target: [
+                        allowMissing: true,
+                        reportDir:   'services/circleguard-identity-service/build/reports/jacoco/test/html',
+                        reportFiles: 'index.html',
+                        reportName:  'Identity Coverage Report'
+                    ]
+                }
+            }
+        }
+        stage('SonarQube Analysis') {
+            steps {
+                dir("${REPO_ROOT}") {
+                    withSonarQubeEnv(installationName: 'SonarQube') {
+                        sh '''./gradlew sonar --no-daemon --max-workers 1 \
+                          -Dsonar.projectKey=circleguard-identity-service \
+                          -Dsonar.projectName="CircleGuard Identity Service" \
+                          -Dsonar.sources=services/circleguard-identity-service/src/main/kotlin \
+                          -Dsonar.tests=services/circleguard-identity-service/src/test/kotlin \
+                          -Dsonar.coverage.jacoco.xmlReportPaths=services/circleguard-identity-service/build/reports/jacoco/test/jacocoTestReport.xml
+                        '''
+                    }
+                }
+            }
+        }
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
         stage('Docker Build') {
             steps {
                 dir("${REPO_ROOT}") {
                     sh """
-                        docker build -f services/circleguard-identity-service/Dockerfile                           -t circleguard-identity-service:${IMAGE_TAG}                           -t circleguard-identity-service:latest .
+                        docker build -f services/circleguard-identity-service/Dockerfile \
+                          -t circleguard-identity-service:${IMAGE_TAG} \
+                          -t circleguard-identity-service:latest .
                     """
+                }
+            }
+        }
+        stage('Trivy Scan') {
+            steps {
+                dir("${REPO_ROOT}") {
+                    sh """
+                        which trivy 2>/dev/null || curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+                        trivy image --severity HIGH,CRITICAL --exit-code 1 \
+                          --format json \
+                          --output trivy-identity-${BUILD_NUMBER}.json \
+                          circleguard-identity-service:${IMAGE_TAG} || true
+                    """
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'trivy-identity-*.json', allowEmptyArchive: true
                 }
             }
         }
@@ -101,7 +166,12 @@ pipeline {
             steps {
                 dir("${REPO_ROOT}/tests/e2e") {
                     sh """
-                        newman run circleguard-e2e.postman_collection.json                           --environment stage.env.json                           --reporters cli,junit,htmlextra                           --reporter-junit-export reports/e2e-identity-${BUILD_NUMBER}.xml                           --reporter-htmlextra-export reports/e2e-identity-${BUILD_NUMBER}.html                           --bail || true
+                        newman run circleguard-e2e.postman_collection.json \
+                          --environment stage.env.json \
+                          --reporters cli,junit,htmlextra \
+                          --reporter-junit-export reports/e2e-identity-${BUILD_NUMBER}.xml \
+                          --reporter-htmlextra-export reports/e2e-identity-${BUILD_NUMBER}.html \
+                          --bail || true
                     """
                 }
             }
@@ -114,6 +184,10 @@ pipeline {
         stage('Promote Prod') {
             when { expression { params.ENVIRONMENT == 'master' } }
             steps {
+                timeout(time: 30, unit: 'MINUTES') {
+                    input message: "¿Aprobar despliegue de ${env.SERVICE} a producción?",
+                          ok: 'Aprobar'
+                }
                 dir("${REPO_ROOT}") {
                     sh 'docker tag circleguard-identity-service:stage-latest circleguard-identity-service:prod-latest'
                     sh 'kubectl kustomize k8s/overlays/prod --load-restrictor=LoadRestrictionsNone | kubectl apply -f - || true'
@@ -136,6 +210,18 @@ pipeline {
         }
     }
     post {
+        failure {
+            emailext(
+                subject: "FALLO — ${env.SERVICE} Build #${env.BUILD_NUMBER} [${params.ENVIRONMENT}]",
+                body: """<h2>Pipeline Fallido</h2>
+                        <p><b>Servicio:</b> ${env.SERVICE}</p>
+                        <p><b>Build:</b> #${env.BUILD_NUMBER}</p>
+                        <p><b>Ambiente:</b> ${params.ENVIRONMENT}</p>
+                        <p>Ver detalles: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>""",
+                to: 'admin@circleguard.local',
+                mimeType: 'text/html'
+            )
+        }
         always {
             cleanWs cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true
         }
