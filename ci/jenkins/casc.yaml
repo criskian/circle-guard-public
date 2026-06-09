@@ -155,9 +155,6 @@ unclassified:
       - name: "SonarQube"
         serverUrl: "http://host.docker.internal:9000"
         credentialsId: ""
-        triggers:
-          skipScmCause: false
-          skipUpstreamCause: false
   mailer:
     smtpHost: "host.docker.internal"
     smtpPort: "1025"
@@ -170,7 +167,3 @@ unclassified:
     defaultRecipients: "admin@circleguard.local"
     defaultReplyTo: "noreply@circleguard.local"
     defaultSubject: "$PROJECT_NAME - Build #$BUILD_NUMBER - $BUILD_STATUS!"
-    mailAccount:
-      smtpHost: "host.docker.internal"
-      smtpPort: "1025"
-      useSsl: false
