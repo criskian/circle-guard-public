@@ -52,3 +52,13 @@ neo4jdata/
 
 enunciado-proyecto-final.md
 PLAN-PROYECTO-FINAL.md
+
+# Terraform
+**/.terraform/
+**/terraform.tfstate
+**/terraform.tfstate.backup
+**/terraform.tfstate.d/
+**/.terraformrc
+**/terraform.rc
+# Keep tfvars but not local overrides
+**/terraform.tfvars.local
