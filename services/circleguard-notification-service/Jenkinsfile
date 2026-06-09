@@ -14,9 +14,10 @@ pipeline {
         SERVICE     = 'circleguard-notification-service'
         SHORT_NAME  = 'notification'
         PORT        = '8082'
-        REPO_ROOT    = "${WORKSPACE}"
-        IMAGE_TAG   = 'notification-${BUILD_NUMBER}'
+        REPO_ROOT   = "${WORKSPACE}"
+        IMAGE_TAG   = "notification-${BUILD_NUMBER}"
         GRADLE_OPTS = '-Xmx512m -Dfile.encoding=UTF-8'
+        SONAR_HOST  = 'http://sonarqube:9000'
     }
     stages {
         stage('Checkout') {
@@ -69,12 +70,76 @@ pipeline {
                 }
             }
         }
+        stage('Coverage') {
+            steps {
+                dir("${REPO_ROOT}") {
+                    sh './gradlew :services:circleguard-notification-service:jacocoTestReport --no-daemon --max-workers 1'
+                }
+            }
+            post {
+                always {
+                    jacoco execPattern: 'services/circleguard-notification-service/build/jacoco/*.exec',
+                           classPattern: 'services/circleguard-notification-service/build/classes/kotlin/main',
+                           sourcePattern: 'services/circleguard-notification-service/src/main/kotlin',
+                           minimumLineCoverage: '60',
+                           changeBuildStatus: false
+                    publishHTML target: [
+                        allowMissing: true,
+                        reportDir:   'services/circleguard-notification-service/build/reports/jacoco/test/html',
+                        reportFiles: 'index.html',
+                        reportName:  'Notification Coverage Report'
+                    ]
+                }
+            }
+        }
+        stage('SonarQube Analysis') {
+            steps {
+                dir("${REPO_ROOT}") {
+                    withSonarQubeEnv(installationName: 'SonarQube') {
+                        sh '''./gradlew sonar --no-daemon --max-workers 1 \
+                          -Dsonar.projectKey=circleguard-notification-service \
+                          -Dsonar.projectName="CircleGuard Notification Service" \
+                          -Dsonar.sources=services/circleguard-notification-service/src/main/kotlin \
+                          -Dsonar.tests=services/circleguard-notification-service/src/test/kotlin \
+                          -Dsonar.coverage.jacoco.xmlReportPaths=services/circleguard-notification-service/build/reports/jacoco/test/jacocoTestReport.xml
+                        '''
+                    }
+                }
+            }
+        }
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
         stage('Docker Build') {
             steps {
                 dir("${REPO_ROOT}") {
                     sh """
-                        docker build -f services/circleguard-notification-service/Dockerfile                           -t circleguard-notification-service:${IMAGE_TAG}                           -t circleguard-notification-service:latest .
+                        docker build -f services/circleguard-notification-service/Dockerfile \
+                          -t circleguard-notification-service:${IMAGE_TAG} \
+                          -t circleguard-notification-service:latest .
                     """
+                }
+            }
+        }
+        stage('Trivy Scan') {
+            steps {
+                dir("${REPO_ROOT}") {
+                    sh """
+                        which trivy 2>/dev/null || curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+                        trivy image --severity HIGH,CRITICAL --exit-code 1 \
+                          --format json \
+                          --output trivy-notification-${BUILD_NUMBER}.json \
+                          circleguard-notification-service:${IMAGE_TAG} || true
+                    """
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'trivy-notification-*.json', allowEmptyArchive: true
                 }
             }
         }
@@ -101,7 +166,12 @@ pipeline {
             steps {
                 dir("${REPO_ROOT}/tests/e2e") {
                     sh """
-                        newman run circleguard-e2e.postman_collection.json                           --environment stage.env.json                           --reporters cli,junit,htmlextra                           --reporter-junit-export reports/e2e-notification-${BUILD_NUMBER}.xml                           --reporter-htmlextra-export reports/e2e-notification-${BUILD_NUMBER}.html                           --bail || true
+                        newman run circleguard-e2e.postman_collection.json \
+                          --environment stage.env.json \
+                          --reporters cli,junit,htmlextra \
+                          --reporter-junit-export reports/e2e-notification-${BUILD_NUMBER}.xml \
+                          --reporter-htmlextra-export reports/e2e-notification-${BUILD_NUMBER}.html \
+                          --bail || true
                     """
                 }
             }
@@ -114,6 +184,10 @@ pipeline {
         stage('Promote Prod') {
             when { expression { params.ENVIRONMENT == 'master' } }
             steps {
+                timeout(time: 30, unit: 'MINUTES') {
+                    input message: "¿Aprobar despliegue de ${env.SERVICE} a producción?",
+                          ok: 'Aprobar'
+                }
                 dir("${REPO_ROOT}") {
                     sh 'docker tag circleguard-notification-service:stage-latest circleguard-notification-service:prod-latest'
                     sh 'kubectl kustomize k8s/overlays/prod --load-restrictor=LoadRestrictionsNone | kubectl apply -f - || true'
@@ -136,6 +210,18 @@ pipeline {
         }
     }
     post {
+        failure {
+            emailext(
+                subject: "FALLO — ${env.SERVICE} Build #${env.BUILD_NUMBER} [${params.ENVIRONMENT}]",
+                body: """<h2>Pipeline Fallido</h2>
+                        <p><b>Servicio:</b> ${env.SERVICE}</p>
+                        <p><b>Build:</b> #${env.BUILD_NUMBER}</p>
+                        <p><b>Ambiente:</b> ${params.ENVIRONMENT}</p>
+                        <p>Ver detalles: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>""",
+                to: 'admin@circleguard.local',
+                mimeType: 'text/html'
+            )
+        }
         always {
             cleanWs cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true
         }

@@ -149,3 +149,21 @@ unclassified:
     allPipelines: true
   ansiColorBuildWrapper:
     globalColorMapName: xterm
+  sonarGlobalConfiguration:
+    buildWrapperEnabled: false
+    installations:
+      - name: "SonarQube"
+        serverUrl: "http://host.docker.internal:9000"
+        credentialsId: ""
+  mailer:
+    smtpHost: "host.docker.internal"
+    smtpPort: "1025"
+    charset: "UTF-8"
+    useSsl: false
+    useTls: false
+    defaultSuffix: "@circleguard.local"
+  extendedEmailPublisher:
+    defaultContentType: "text/html"
+    defaultRecipients: "admin@circleguard.local"
+    defaultReplyTo: "noreply@circleguard.local"
+    defaultSubject: "$PROJECT_NAME - Build #$BUILD_NUMBER - $BUILD_STATUS!"
