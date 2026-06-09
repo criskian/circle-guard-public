@@ -1,0 +1,39 @@
+# cert-manager ClusterIssuer (self-signed) para TLS en gateway-service
+#
+# Prerequisito: cert-manager instalado en el cluster
+#   kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.4/cert-manager.yaml
+#   kubectl wait --for=condition=Available deployment/cert-manager -n cert-manager --timeout=120s
+#
+# Uso:
+#   kubectl apply -f k8s/security/02-tls-issuer.yaml
+
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: circleguard-selfsigned-issuer
+  labels:
+    app.kubernetes.io/managed-by: kubectl
+    app.kubernetes.io/part-of: circleguard
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: circleguard-gateway-tls
+  namespace: circleguard-dev
+  labels:
+    app.kubernetes.io/managed-by: kubectl
+    app.kubernetes.io/part-of: circleguard
+spec:
+  secretName: circleguard-gateway-tls-secret
+  issuerRef:
+    name: circleguard-selfsigned-issuer
+    kind: ClusterIssuer
+  commonName: circleguard.local
+  dnsNames:
+    - circleguard.local
+    - gateway.circleguard.local
+    - localhost
+  duration: 8760h   # 1 year
+  renewBefore: 720h # 30 days before expiry

@@ -17,3 +17,7 @@ ws-cleanup:latest
 pipeline-stage-view:latest
 job-dsl:latest
 configuration-as-code:latest
+sonar:latest
+email-ext:latest
+jacoco:latest
+mailer:latest

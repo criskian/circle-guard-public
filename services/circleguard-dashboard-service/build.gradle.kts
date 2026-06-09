@@ -38,3 +38,27 @@ tasks.register<Test>("integrationTest") {
     shouldRunAfter("test")
     outputs.upToDateWhen { false }
 }
+
+tasks.named<org.gradle.testing.jacoco.tasks.JacocoCoverageVerification>("jacocoTestCoverageVerification") {
+    dependsOn(tasks.named("jacocoTestReport"))
+    violationRules {
+        rule {
+            limit {
+                counter = "LINE"
+                value = "COVEREDRATIO"
+                minimum = "0.60".toBigDecimal()
+            }
+        }
+    }
+}
+
+sonarqube {
+    properties {
+        property("sonar.projectKey",  "circleguard-dashboard-service")
+        property("sonar.projectName", "CircleGuard Dashboard Service")
+        property("sonar.sources",     "src/main/kotlin")
+        property("sonar.tests",       "src/test/kotlin")
+        property("sonar.coverage.jacoco.xmlReportPaths",
+                 "build/reports/jacoco/test/jacocoTestReport.xml")
+    }
+}

@@ -1,0 +1,68 @@
+# Ingress con TLS para circleguard-gateway-service
+#
+# Prerequisitos:
+#   1. NGINX Ingress Controller: kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+#   2. cert-manager + ClusterIssuer: kubectl apply -f k8s/security/02-tls-issuer.yaml
+#
+# Uso:
+#   kubectl apply -f k8s/security/03-gateway-ingress.yaml -n circleguard-dev
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: circleguard-gateway-ingress
+  namespace: circleguard-dev
+  labels:
+    app.kubernetes.io/name: gateway-service
+    app.kubernetes.io/part-of: circleguard
+    app.kubernetes.io/managed-by: kubectl
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "circleguard-selfsigned-issuer"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "30"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - circleguard.local
+        - gateway.circleguard.local
+      secretName: circleguard-gateway-tls-secret
+  rules:
+    - host: circleguard.local
+      http:
+        paths:
+          - path: /api/auth
+            pathType: Prefix
+            backend:
+              service:
+                name: gateway-service
+                port:
+                  number: 8087
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: gateway-service
+                port:
+                  number: 8087
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: gateway-service
+                port:
+                  number: 8087
+    - host: gateway.circleguard.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: gateway-service
+                port:
+                  number: 8087
