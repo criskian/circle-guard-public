@@ -57,6 +57,8 @@ resource "kubernetes_config_map" "app" {
 resource "kubernetes_deployment" "service" {
   for_each = var.services
 
+  wait_for_rollout = false
+
   metadata {
     name      = each.key
     namespace = var.namespace
