@@ -33,7 +33,14 @@ import static org.assertj.core.api.Assertions.*;
 @Import(FormKafkaIntegrationTest.KafkaTestListeners.class)
 @EmbeddedKafka(
         partitions = 1,
-        topics = {"survey.submitted", "certificate.validated"}
+        topics = {"survey.submitted", "certificate.validated"},
+        brokerProperties = {
+                "offsets.topic.replication.factor=1",
+                "transaction.state.log.replication.factor=1",
+                "transaction.state.log.min.isr=1",
+                "group.initial.rebalance.delay.ms=0",
+                "min.insync.replicas=1"
+        }
 )
 @TestPropertySource(properties = {
         "spring.datasource.url=jdbc:h2:mem:form_inttest;DB_CLOSE_DELAY=-1",

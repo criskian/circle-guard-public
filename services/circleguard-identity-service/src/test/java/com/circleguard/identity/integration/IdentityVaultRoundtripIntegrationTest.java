@@ -24,7 +24,17 @@ import static org.assertj.core.api.Assertions.*;
 @Tag("integration")
 @SpringBootTest
 @DirtiesContext
-@EmbeddedKafka(partitions = 1, topics = {"audit.identity.accessed"})
+@EmbeddedKafka(
+        partitions = 1,
+        topics = {"audit.identity.accessed"},
+        brokerProperties = {
+                "offsets.topic.replication.factor=1",
+                "transaction.state.log.replication.factor=1",
+                "transaction.state.log.min.isr=1",
+                "group.initial.rebalance.delay.ms=0",
+                "min.insync.replicas=1"
+        }
+)
 @TestPropertySource(properties = {
         "spring.datasource.url=jdbc:h2:mem:identity_inttest;DB_CLOSE_DELAY=-1",
         "spring.datasource.driver-class-name=org.h2.Driver",

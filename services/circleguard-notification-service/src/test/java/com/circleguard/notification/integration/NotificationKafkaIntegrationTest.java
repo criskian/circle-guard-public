@@ -20,7 +20,14 @@ import org.springframework.test.context.TestPropertySource;
 @SpringBootTest
 @EmbeddedKafka(
         partitions = 1,
-        topics = {"promotion.status.changed"}
+        topics = {"promotion.status.changed"},
+        brokerProperties = {
+                "offsets.topic.replication.factor=1",
+                "transaction.state.log.replication.factor=1",
+                "transaction.state.log.min.isr=1",
+                "group.initial.rebalance.delay.ms=0",
+                "min.insync.replicas=1"
+        }
 )
 @TestPropertySource(properties = {
         "spring.kafka.bootstrap-servers=${spring.embedded.kafka.brokers}",

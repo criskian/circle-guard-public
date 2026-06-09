@@ -33,7 +33,14 @@ import static org.mockito.Mockito.*;
 @DirtiesContext
 @EmbeddedKafka(
         partitions = 1,
-        topics = {"survey.submitted", "certificate.validated", "promotion.status.changed"}
+        topics = {"survey.submitted", "certificate.validated", "promotion.status.changed"},
+        brokerProperties = {
+                "offsets.topic.replication.factor=1",
+                "transaction.state.log.replication.factor=1",
+                "transaction.state.log.min.isr=1",
+                "group.initial.rebalance.delay.ms=0",
+                "min.insync.replicas=1"
+        }
 )
 @TestPropertySource(properties = {
         "spring.kafka.bootstrap-servers=${spring.embedded.kafka.brokers}",
