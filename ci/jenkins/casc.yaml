@@ -1,6 +1,6 @@
 jenkins:
   systemMessage: "CircleGuard CI/CD — Taller 2 Ingeniería de Software"
-  numExecutors: 6
+  numExecutors: 2
   mode: NORMAL
 
   securityRealm:
@@ -154,7 +154,7 @@ unclassified:
     installations:
       - name: "SonarQube"
         serverUrl: "http://host.docker.internal:9000"
-        credentialsId: ""
+        credentialsId: "sonarqube-token"
   mailer:
     smtpHost: "host.docker.internal"
     smtpPort: "1025"

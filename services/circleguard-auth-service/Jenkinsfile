@@ -80,7 +80,7 @@ pipeline {
                 always {
                     jacoco execPattern: 'services/circleguard-auth-service/build/jacoco/*.exec',
                            classPattern: 'services/circleguard-auth-service/build/classes/kotlin/main',
-                           sourcePattern: 'services/circleguard-auth-service/src/main/kotlin',
+                           sourcePattern: 'services/circleguard-auth-service/src/main/java',
                            minimumLineCoverage: '60',
                            changeBuildStatus: false
                     publishHTML target: [
@@ -99,8 +99,8 @@ pipeline {
                         sh '''./gradlew sonar --no-daemon --max-workers 1 \
                           -Dsonar.projectKey=circleguard-auth-service \
                           -Dsonar.projectName="CircleGuard Auth Service" \
-                          -Dsonar.sources=services/circleguard-auth-service/src/main/kotlin \
-                          -Dsonar.tests=services/circleguard-auth-service/src/test/kotlin \
+                          -Dsonar.sources=services/circleguard-auth-service/src/main/java \
+                          -Dsonar.tests=services/circleguard-auth-service/src/test/java \
                           -Dsonar.coverage.jacoco.xmlReportPaths=services/circleguard-auth-service/build/reports/jacoco/test/jacocoTestReport.xml
                         '''
                     }

@@ -56,8 +56,8 @@ sonarqube {
     properties {
         property("sonar.projectKey",  "circleguard-dashboard-service")
         property("sonar.projectName", "CircleGuard Dashboard Service")
-        property("sonar.sources",     "src/main/kotlin")
-        property("sonar.tests",       "src/test/kotlin")
+        property("sonar.sources",     "src/main/java")
+        property("sonar.tests",       "src/test/java")
         property("sonar.coverage.jacoco.xmlReportPaths",
                  "build/reports/jacoco/test/jacocoTestReport.xml")
     }
