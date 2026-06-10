@@ -60,9 +60,10 @@ public class PromotionPerformanceTest {
 
     private String rootUser;
 
-    // NFR-1 cascade budget. Defaults to the strict 1s target for local/native runs;
-    // in CI the Neo4j Testcontainer is reached over the Docker bridge (host.docker.internal),
-    // so the round-trip latency budget is widened via PROMOTION_NFR_CASCADE_MAX_MS.
+    // NFR-1 cascade budget in milliseconds. Local and native runs keep the strict
+    // one second target. In CI the Neo4j test container is reached over the Docker
+    // bridge, so the budget is widened through an environment variable to absorb the
+    // extra network round trip latency.
     private static final long CASCADE_MAX_MS = resolveCascadeBudget();
 
     private static long resolveCascadeBudget() {
