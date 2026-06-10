@@ -96,7 +96,7 @@ pipeline {
             steps {
                 dir("${REPO_ROOT}") {
                     withSonarQubeEnv(installationName: 'SonarQube') {
-                        sh './gradlew sonar --no-daemon --max-workers 1'
+                        sh './gradlew classes testClasses sonar --no-daemon --max-workers 1'
                     }
                 }
             }
