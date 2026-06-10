@@ -96,13 +96,7 @@ pipeline {
             steps {
                 dir("${REPO_ROOT}") {
                     withSonarQubeEnv(installationName: 'SonarQube') {
-                        sh '''./gradlew sonar --no-daemon --max-workers 1 \
-                          -Dsonar.projectKey=circleguard-promotion-service \
-                          -Dsonar.projectName="CircleGuard Promotion Service" \
-                          -Dsonar.sources=services/circleguard-promotion-service/src/main/java \
-                          -Dsonar.tests=services/circleguard-promotion-service/src/test/java \
-                          -Dsonar.coverage.jacoco.xmlReportPaths=services/circleguard-promotion-service/build/reports/jacoco/test/jacocoTestReport.xml
-                        '''
+                        sh './gradlew sonar --no-daemon --max-workers 1'
                     }
                 }
             }
