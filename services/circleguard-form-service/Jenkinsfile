@@ -79,7 +79,7 @@ pipeline {
             post {
                 always {
                     jacoco execPattern: 'services/circleguard-form-service/build/jacoco/*.exec',
-                           classPattern: 'services/circleguard-form-service/build/classes/kotlin/main',
+                           classPattern: 'services/circleguard-form-service/build/classes/java/main',
                            sourcePattern: 'services/circleguard-form-service/src/main/java',
                            minimumLineCoverage: '60',
                            changeBuildStatus: false

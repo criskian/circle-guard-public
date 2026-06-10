@@ -18,6 +18,10 @@ pipeline {
         IMAGE_TAG   = "promotion-${BUILD_NUMBER}"
         GRADLE_OPTS = '-Xmx512m -Dfile.encoding=UTF-8'
         SONAR_HOST  = 'http://sonarqube:9000'
+        // Testcontainers running inside the Jenkins container (Docker-outside-Docker):
+        // reach mapped ports via host.docker.internal and skip Ryuk (unreachable on 172.17.0.1)
+        TESTCONTAINERS_HOST_OVERRIDE = 'host.docker.internal'
+        TESTCONTAINERS_RYUK_DISABLED = 'true'
     }
     stages {
         stage('Checkout') {
@@ -79,7 +83,7 @@ pipeline {
             post {
                 always {
                     jacoco execPattern: 'services/circleguard-promotion-service/build/jacoco/*.exec',
-                           classPattern: 'services/circleguard-promotion-service/build/classes/kotlin/main',
+                           classPattern: 'services/circleguard-promotion-service/build/classes/java/main',
                            sourcePattern: 'services/circleguard-promotion-service/src/main/java',
                            minimumLineCoverage: '60',
                            changeBuildStatus: false
