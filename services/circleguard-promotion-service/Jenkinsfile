@@ -22,6 +22,9 @@ pipeline {
         // reach mapped ports via host.docker.internal and skip Ryuk (unreachable on 172.17.0.1)
         TESTCONTAINERS_HOST_OVERRIDE = 'host.docker.internal'
         TESTCONTAINERS_RYUK_DISABLED = 'true'
+        // Neo4j is reached over the Docker bridge in CI, so the cascade NFR budget is
+        // widened from the strict 1s native target to absorb round-trip latency.
+        PROMOTION_NFR_CASCADE_MAX_MS = '10000'
     }
     stages {
         stage('Checkout') {

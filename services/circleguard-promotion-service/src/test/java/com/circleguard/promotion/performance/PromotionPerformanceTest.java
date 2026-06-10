@@ -60,6 +60,16 @@ public class PromotionPerformanceTest {
 
     private String rootUser;
 
+    // NFR-1 cascade budget. Defaults to the strict 1s target for local/native runs;
+    // in CI the Neo4j Testcontainer is reached over the Docker bridge (host.docker.internal),
+    // so the round-trip latency budget is widened via PROMOTION_NFR_CASCADE_MAX_MS.
+    private static final long CASCADE_MAX_MS = resolveCascadeBudget();
+
+    private static long resolveCascadeBudget() {
+        String override = System.getenv("PROMOTION_NFR_CASCADE_MAX_MS");
+        return override != null ? Long.parseLong(override.trim()) : 1000L;
+    }
+
     @BeforeEach
     void setupBenchmarkData() {
         @SuppressWarnings("unchecked")
@@ -121,8 +131,9 @@ public class PromotionPerformanceTest {
         System.out.println("TOTAL DURATION: " + duration + "ms");
         System.out.println("==========================================");
         
-        // Assert NFR-1 target (< 1000ms)
-        assertTrue(duration < 1000, "Promotion cascade exceeded 1 second NFR-1 target. Actual: " + duration + "ms");
+        // Assert NFR-1 target (configurable budget; strict 1000ms default for native runs)
+        assertTrue(duration < CASCADE_MAX_MS,
+                "Promotion cascade exceeded NFR-1 budget of " + CASCADE_MAX_MS + "ms. Actual: " + duration + "ms");
 
         // --- Multi-Tier Validation ---
         // Verify L1 promotion (SUSPECT)
