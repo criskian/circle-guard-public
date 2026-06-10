@@ -94,9 +94,11 @@ pipeline {
         }
         stage('SonarQube Analysis') {
             steps {
-                dir("${REPO_ROOT}") {
-                    withSonarQubeEnv(installationName: 'SonarQube') {
-                        sh './gradlew classes testClasses sonar --no-daemon --max-workers 1'
+                lock('sonar-analysis') {
+                    dir("${REPO_ROOT}") {
+                        withSonarQubeEnv(installationName: 'SonarQube') {
+                            sh './gradlew classes testClasses sonar --no-daemon --max-workers 1'
+                        }
                     }
                 }
             }
