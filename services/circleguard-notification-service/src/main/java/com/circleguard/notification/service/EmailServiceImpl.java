@@ -1,5 +1,6 @@
 package com.circleguard.notification.service;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.SimpleMailMessage;
@@ -16,6 +17,7 @@ public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender mailSender;
     private final AuditLogService auditLogService;
+    private final MeterRegistry meterRegistry;
 
     @Override
     @Async
@@ -36,6 +38,8 @@ public class EmailServiceImpl implements EmailService {
             mailSender.send(mailMessage);
             log.info("Email sent successfully to user: {}", userId);
             auditLogService.logDelivery(userId, "EMAIL", "SUCCESS", correlationId);
+            // Business metric: total notifications delivered
+            meterRegistry.counter("notifications_sent_total", "channel", "email", "status", "success").increment();
             return CompletableFuture.completedFuture(null);
         } catch (Exception e) {
             log.warn("Failed to send email to user {} (correlationId: {}): {}", userId, correlationId, e.getMessage());

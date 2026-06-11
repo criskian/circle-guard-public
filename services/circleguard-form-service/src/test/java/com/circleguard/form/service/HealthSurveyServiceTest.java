@@ -4,6 +4,7 @@ import com.circleguard.form.model.HealthSurvey;
 import com.circleguard.form.model.Questionnaire;
 import com.circleguard.form.model.ValidationStatus;
 import com.circleguard.form.repository.HealthSurveyRepository;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,7 +32,7 @@ class HealthSurveyServiceTest {
 
     @BeforeEach
     void setUp() {
-        surveyService = new HealthSurveyService(surveyRepository, questionnaireService, symptomMapper, kafkaTemplate);
+        surveyService = new HealthSurveyService(surveyRepository, questionnaireService, symptomMapper, kafkaTemplate, new SimpleMeterRegistry());
     }
 
     @Test

@@ -47,6 +47,11 @@ subprojects {
         "testCompileOnly"("org.projectlombok:lombok")
         "testAnnotationProcessor"("org.projectlombok:lombok")
         "implementation"("org.jetbrains.kotlin:kotlin-reflect")
+        // ── Observabilidad (Día 4): métricas Prometheus + tracing distribuido OTLP ──
+        "implementation"("org.springframework.boot:spring-boot-starter-actuator")
+        "implementation"("io.micrometer:micrometer-registry-prometheus")
+        "implementation"("io.micrometer:micrometer-tracing-bridge-otel")
+        "implementation"("io.opentelemetry:opentelemetry-exporter-otlp")
         "testImplementation"("org.springframework.boot:spring-boot-starter-test")
         "testRuntimeOnly"("com.h2database:h2")
     }

@@ -5,6 +5,7 @@ import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -17,6 +18,7 @@ public class QrValidationService {
 
     private final StringRedisTemplate redisTemplate;
     private final FeatureFlags featureFlags;
+    private final MeterRegistry meterRegistry;
 
     @Value("${qr.secret}")
     private String qrSecret;
@@ -36,11 +38,14 @@ public class QrValidationService {
             String status = fetchStatusFromRedis(anonymousId);
 
             if ("CONTAGIED".equals(status) || "POTENTIAL".equals(status)) {
+                meterRegistry.counter("qr_validations_total", "result", "denied").increment();
                 return new ValidationResult(false, "RED", "Access Denied: Health Risk Detected");
             }
+            meterRegistry.counter("qr_validations_total", "result", "granted").increment();
             return new ValidationResult(true, "GREEN", "Welcome to Campus");
 
         } catch (Exception e) {
+            meterRegistry.counter("qr_validations_total", "result", "invalid").increment();
             return new ValidationResult(false, "RED", "Invalid or Expired Token");
         }
     }

@@ -4,6 +4,7 @@ import com.circleguard.gateway.config.FeatureFlags;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -33,7 +34,7 @@ public class QrValidationServiceTest {
         featureFlags = new FeatureFlags();
         featureFlags.setStrictQrValidation(true);
 
-        service = new QrValidationService(redisTemplate, featureFlags);
+        service = new QrValidationService(redisTemplate, featureFlags, new SimpleMeterRegistry());
         ReflectionTestUtils.setField(service, "qrSecret", secret);
     }
 
