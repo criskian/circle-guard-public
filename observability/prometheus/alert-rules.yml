@@ -1,0 +1,34 @@
+# Reglas de alerta Prometheus para CircleGuard (Día 4).
+groups:
+  - name: circleguard-availability
+    rules:
+      - alert: ServiceDown
+        expr: up{job="circleguard-services"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Servicio {{ $labels.service }} caído"
+          description: "El target {{ $labels.instance }} ({{ $labels.service }}) no responde a Prometheus desde hace 1 min."
+
+  - name: circleguard-latency-errors
+    rules:
+      - alert: HighRequestLatencyP99
+        expr: histogram_quantile(0.99, sum(rate(http_server_requests_seconds_bucket[5m])) by (le, service)) > 1.5
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Latencia p99 alta en {{ $labels.service }}"
+          description: "La latencia p99 de {{ $labels.service }} supera 1.5s durante 2 min."
+
+      - alert: HighErrorRate5xx
+        expr: |
+          sum(rate(http_server_requests_seconds_count{status=~"5.."}[5m])) by (service)
+          / sum(rate(http_server_requests_seconds_count[5m])) by (service) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Tasa de errores 5xx alta en {{ $labels.service }}"
+          description: "Más del 5% de las respuestas de {{ $labels.service }} son 5xx durante 2 min."

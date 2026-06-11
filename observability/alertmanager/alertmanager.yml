@@ -1,0 +1,23 @@
+# Alertmanager — enruta alertas críticas por email a MailHog (mismo MailHog del Día 3).
+global:
+  resolve_timeout: 5m
+  smtp_smarthost: "host.docker.internal:1025"
+  smtp_from: "alertmanager@circleguard.local"
+  smtp_require_tls: false
+
+route:
+  receiver: mailhog
+  group_by: ["alertname", "service"]
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 1h
+  routes:
+    - matchers:
+        - severity = "critical"
+      receiver: mailhog
+
+receivers:
+  - name: mailhog
+    email_configs:
+      - to: "oncall@circleguard.local"
+        send_resolved: true

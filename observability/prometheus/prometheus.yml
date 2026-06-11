@@ -1,0 +1,39 @@
+# Prometheus scrape config for CircleGuard microservices (Día 4 — Observabilidad).
+# Los servicios corren en docker-compose.dev.yml y publican sus puertos en el host,
+# por lo que se scrapean vía host.docker.internal:<puerto>/actuator/prometheus.
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: circleguard-dev
+
+rule_files:
+  - /etc/prometheus/alert-rules.yml
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ["alertmanager:9093"]
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # En docker-compose.dev.yml el actuator corre en el puerto de management (9xxx),
+  # publicado en el host. Por eso se scrapea host.docker.internal:9xxx.
+  - job_name: circleguard-services
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ["host.docker.internal:9180"]
+        labels: { service: auth-service }
+      - targets: ["host.docker.internal:9082"]
+        labels: { service: notification-service }
+      - targets: ["host.docker.internal:9083"]
+        labels: { service: identity-service }
+      - targets: ["host.docker.internal:9084"]
+        labels: { service: dashboard-service }
+      - targets: ["host.docker.internal:9086"]
+        labels: { service: form-service }
+      - targets: ["host.docker.internal:9088"]
+        labels: { service: promotion-service }

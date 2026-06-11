@@ -1,0 +1,65 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "title": "CircleGuard — Overview",
+  "uid": "circleguard-overview",
+  "tags": ["circleguard"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "time": { "from": "now-30m", "to": "now" },
+  "refresh": "10s",
+  "templating": { "list": [] },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Servicios UP",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 0 },
+      "fieldConfig": { "defaults": { "mappings": [ { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } } ] } },
+      "targets": [ { "expr": "up{job=\"circleguard-services\"}", "legendFormat": "{{service}}" } ]
+    },
+    {
+      "id": 2,
+      "title": "Request rate (req/s) por servicio",
+      "type": "timeseries",
+      "gridPos": { "h": 6, "w": 16, "x": 8, "y": 0 },
+      "targets": [ { "expr": "sum(rate(http_server_requests_seconds_count[1m])) by (service)", "legendFormat": "{{service}}" } ]
+    },
+    {
+      "id": 3,
+      "title": "Latencia p99 (s) por servicio",
+      "type": "timeseries",
+      "gridPos": { "h": 7, "w": 12, "x": 0, "y": 6 },
+      "targets": [ { "expr": "histogram_quantile(0.99, sum(rate(http_server_requests_seconds_bucket[5m])) by (le, service))", "legendFormat": "{{service}}" } ]
+    },
+    {
+      "id": 4,
+      "title": "JVM heap usado (MB) por servicio",
+      "type": "timeseries",
+      "gridPos": { "h": 7, "w": 12, "x": 12, "y": 6 },
+      "targets": [ { "expr": "sum(jvm_memory_used_bytes{area=\"heap\"}) by (service) / 1024 / 1024", "legendFormat": "{{service}}" } ]
+    },
+    {
+      "id": 5,
+      "title": "Negocio — surveys_submitted_total",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 13 },
+      "targets": [ { "expr": "sum(surveys_submitted_total)" } ]
+    },
+    {
+      "id": 6,
+      "title": "Negocio — notifications_sent_total",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 13 },
+      "targets": [ { "expr": "sum(notifications_sent_total)" } ]
+    },
+    {
+      "id": 7,
+      "title": "Negocio — qr_validations_total por resultado",
+      "type": "timeseries",
+      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 13 },
+      "targets": [ { "expr": "sum(qr_validations_total) by (result)", "legendFormat": "{{result}}" } ]
+    }
+  ]
+}
