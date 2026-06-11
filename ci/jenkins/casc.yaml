@@ -167,3 +167,8 @@ unclassified:
     defaultRecipients: "admin@circleguard.local"
     defaultReplyTo: "noreply@circleguard.local"
     defaultSubject: "$PROJECT_NAME - Build #$BUILD_NUMBER - $BUILD_STATUS!"
+    # emailext uses its own SMTP account (separate from the core mailer); point it at MailHog
+    mailAccount:
+      smtpHost: "host.docker.internal"
+      smtpPort: "1025"
+      useSsl: false
