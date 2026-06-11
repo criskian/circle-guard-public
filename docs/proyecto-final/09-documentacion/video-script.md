@@ -142,6 +142,10 @@ Ten abiertas las pestañas del navegador antes de grabar para que no se vea tiem
      docker stop circleguard-notification    # esperar ~90s
      ```
      Muestra `http://localhost:9090/alerts` (ServiceDown firing) y el email *"[FIRING:1] ServiceDown"* en MailHog. Luego `docker start circleguard-notification`.
+  6. **ELK — logging centralizado** (`http://localhost:5601` → Discover → data view "CircleGuard Logs"):
+     muestra los logs de los servicios filtrando por `container.name: circleguard-form` o `message: survey.submitted`.
+     > ELK pide RAM: levántalo con el cluster kind detenido —
+     > `docker stop circleguard-dev-control-plane; docker compose -f observability/docker-compose.elk.yml up -d`.
 - **Tip:** este clip impacta visualmente; deja que el dashboard de Grafana se vea poblado.
 
 ---
