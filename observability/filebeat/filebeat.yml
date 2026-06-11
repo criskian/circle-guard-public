@@ -1,0 +1,30 @@
+# Filebeat — recoge logs de los contenedores CircleGuard y los envía a Elasticsearch.
+filebeat.autodiscover:
+  providers:
+    - type: docker
+      hints.enabled: true
+      templates:
+        - condition:
+            contains:
+              docker.container.name: circleguard
+          config:
+            - type: container
+              paths:
+                - /var/lib/docker/containers/${data.docker.container.id}/*.log
+
+processors:
+  - add_docker_metadata: ~
+  - add_fields:
+      target: ""
+      fields:
+        project: circleguard
+
+output.elasticsearch:
+  hosts: ["http://elasticsearch:9200"]
+  index: "circleguard-logs-%{+yyyy.MM.dd}"
+
+setup.template.name: "circleguard-logs"
+setup.template.pattern: "circleguard-logs-*"
+setup.ilm.enabled: false
+
+logging.level: info

@@ -1,0 +1,57 @@
+# Stack ELK para CircleGuard (Día 4): logging centralizado.
+# Elasticsearch single-node con heap reducido (host de 8GB) + Kibana + Filebeat.
+# Filebeat recoge los logs de los contenedores Docker y los envía a Elasticsearch.
+#
+# PESADO: levantar SOLO cuando haya RAM (p.ej. con Jenkins/Sonar detenidos).
+#   docker compose -f observability/docker-compose.elk.yml up -d
+# UIs: Elasticsearch :9200 | Kibana :5601
+name: circleguard-elk
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3
+    container_name: circleguard-elasticsearch
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"   # heap reducido para 8GB
+      bootstrap.memory_lock: "true"
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+    ports:
+      - "9200:9200"
+    mem_limit: 1200m
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -qE 'green|yellow'"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+    restart: unless-stopped
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.14.3
+    container_name: circleguard-kibana
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    mem_limit: 1024m
+    restart: unless-stopped
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.14.3
+    container_name: circleguard-filebeat
+    user: root
+    command: ["filebeat", "-e", "-strict.perms=false"]
+    volumes:
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    mem_limit: 256m
+    restart: unless-stopped
