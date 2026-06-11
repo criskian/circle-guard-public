@@ -57,8 +57,13 @@ PLAN-PROYECTO-FINAL.md
 **/.terraform/
 **/terraform.tfstate
 **/terraform.tfstate.backup
+**/terraform.tfstate.*.backup
 **/terraform.tfstate.d/
 **/.terraformrc
 **/terraform.rc
 # Keep tfvars but not local overrides
 **/terraform.tfvars.local
+
+# Build output (Eclipse/Gradle bin dirs)
+**/bin/main/
+**/bin/test/
