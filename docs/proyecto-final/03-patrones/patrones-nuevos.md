@@ -125,6 +125,44 @@ CIRCLEGUARD_FEATURES_QR_EXPIRATION_ENABLED: "true"
 
 ---
 
+## 3. Retry con Backoff (Spring Retry)
+
+### Propósito
+Patrón de **resiliencia** complementario al Circuit Breaker: ante fallos **transitorios** (un
+servidor de correo o de push momentáneamente no disponible), reintentar automáticamente la
+operación en vez de fallar de inmediato, con una espera entre intentos (backoff) para no saturar.
+
+### Configuración / Implementación
+Habilitado con `@EnableRetry` en `NotificationApplication` (dependencia `spring-retry`).
+Aplicado en el envío de notificaciones (`EmailServiceImpl` y `PushServiceImpl`):
+
+```java
+@Retryable(
+    retryFor = { Exception.class },
+    maxAttempts = 3,
+    backoff = @Backoff(delay = 2000)   // 2s entre intentos
+)
+public CompletableFuture<Void> sendAsync(String userId, String message) { ... }
+
+@Recover  // se ejecuta cuando se agotan los 3 intentos
+public CompletableFuture<Void> recover(Exception e, String userId, String message) {
+    auditLogService.logDelivery(userId, "EMAIL", "FAILED", null);
+    return CompletableFuture.failedFuture(e);
+}
+```
+
+### Diferencia con Circuit Breaker
+- **Retry** insiste en una operación que puede recuperarse sola (fallo transitorio).
+- **Circuit Breaker** deja de insistir cuando un dependiente está caído de forma sostenida.
+- Juntos: el Retry maneja el "parpadeo", el Circuit Breaker protege ante caídas prolongadas.
+
+### Beneficios
+- **Tolerancia a fallos transitorios:** entregas que fallarían por un hipo de red se completan en el 2º o 3er intento.
+- **Backoff:** la espera evita martillar un servicio ya degradado.
+- **Degradación controlada:** `@Recover` registra el fallo definitivo en auditoría sin tumbar el flujo.
+
+---
+
 ## Resumen de Patrones
 
 | Patrón | Categoría | Servicio | Archivo clave |
@@ -137,3 +175,7 @@ CIRCLEGUARD_FEATURES_QR_EXPIRATION_ENABLED: "true"
 | Health Check Probes | Operational | todos | `20-services.yaml` |
 | **Circuit Breaker** ✨ | **Resilience** | **gateway-service** | **`QrValidationService.java`** |
 | **Feature Toggle** ✨ | **Configuration** | **gateway-service** | **`FeatureFlags.java`** |
+| **Retry + Backoff** ✨ | **Resilience** | **notification-service** | **`EmailServiceImpl.java`** |
+
+✨ = patrones nuevos implementados (3): un patrón de **resiliencia** (Circuit Breaker), uno de
+**configuración** (Feature Toggle) y un tercero de **resiliencia** (Retry con backoff).
