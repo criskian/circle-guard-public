@@ -241,6 +241,138 @@ Escenario: Diferencia entre ambientes reflejada en variables
 
 ---
 
+## Sprint 3 — Observabilidad y Seguridad
+
+### HU-09: Monitoreo con métricas y dashboards (Prometheus + Grafana)
+
+**Como** equipo de operaciones,
+**quiero** ver métricas de los servicios en dashboards,
+**para** detectar problemas de disponibilidad y rendimiento.
+
+```gherkin
+Dado que los 6 servicios exponen /actuator/prometheus
+Cuando Prometheus los scrapea cada 15s
+Entonces Grafana muestra disponibilidad, throughput y latencia p99 por servicio
+```
+
+**Estimación:** 5 SP | **Prioridad:** Alta | **Épica:** E7
+
+---
+
+### HU-10: Tracing distribuido con Jaeger
+
+**Como** desarrollador,
+**quiero** seguir una petición a través de los microservicios,
+**para** diagnosticar latencias y errores.
+
+```gherkin
+Dado un request que atraviesa varios servicios
+Cuando se exportan las trazas vía OTLP a Jaeger
+Entonces la UI de Jaeger muestra la traza con sus spans
+```
+
+**Estimación:** 3 SP | **Prioridad:** Media | **Épica:** E7
+
+---
+
+### HU-11: Centralización de logs con ELK
+
+**Como** operador,
+**quiero** consultar los logs de todos los servicios en un solo lugar,
+**para** investigar incidentes rápidamente.
+
+```gherkin
+Dado que los contenedores generan logs
+Cuando Filebeat los envía a Elasticsearch
+Entonces puedo buscarlos y filtrarlos en Kibana por servicio
+```
+
+**Estimación:** 5 SP | **Prioridad:** Media | **Épica:** E7
+
+---
+
+### HU-12: Alertas automáticas de disponibilidad
+
+**Como** operador,
+**quiero** recibir una alerta cuando un servicio cae,
+**para** reaccionar a tiempo.
+
+```gherkin
+Dado un servicio caído por más de 1 minuto
+Cuando Prometheus evalúa la regla ServiceDown
+Entonces Alertmanager envía un correo de alerta
+```
+
+**Estimación:** 3 SP | **Prioridad:** Alta | **Épica:** E7
+
+---
+
+### HU-13: Métricas de negocio
+
+**Como** dueño de producto,
+**quiero** medir eventos de negocio (encuestas, validaciones QR, notificaciones),
+**para** entender el uso del sistema.
+
+```gherkin
+Dado que se envía una encuesta de salud
+Cuando el servicio la procesa
+Entonces surveys_submitted_total se incrementa y es visible en Grafana
+```
+
+**Estimación:** 3 SP | **Prioridad:** Media | **Épica:** E7
+
+---
+
+### HU-14: Gestión segura de secretos con Sealed Secrets
+
+**Como** ingeniero de plataforma,
+**quiero** versionar los secretos cifrados en git,
+**para** no exponer credenciales.
+
+```gherkin
+Dado un SealedSecret cifrado en el repo
+Cuando el controlador sealed-secrets lo procesa
+Entonces crea el Secret desencriptado en el cluster sin exponer el valor en git
+```
+
+**Estimación:** 3 SP | **Prioridad:** Alta | **Épica:** E8
+
+---
+
+### HU-15: TLS y RBAC en Kubernetes
+
+**Como** ingeniero de seguridad,
+**quiero** TLS en los servicios expuestos y acceso de mínimo privilegio,
+**para** proteger el tráfico y limitar permisos.
+
+```gherkin
+Dado el Ingress del gateway
+Cuando cert-manager emite el certificado self-signed
+Entonces el tráfico se sirve por HTTPS
+Y el ServiceAccount circleguard-sa solo tiene permisos de lectura (get/list/watch)
+```
+
+**Estimación:** 5 SP | **Prioridad:** Alta | **Épica:** E8
+
+---
+
+### HU-16: Pruebas de rendimiento y seguridad
+
+**Como** QA,
+**quiero** validar el sistema bajo carga y escanear vulnerabilidades,
+**para** asegurar resiliencia y seguridad.
+
+```gherkin
+Dado un escenario de carga sostenida y de pico con Locust
+Cuando se ejecutan las pruebas
+Entonces se genera un reporte de latencias (p95 < 80ms sostenido)
+Y OWASP ZAP produce un reporte sin vulnerabilidades críticas
+```
+
+**Estimación:** 5 SP | **Prioridad:** Media | **Épica:** E9
+
+---
+
 ## Resumen del Backlog
 
 | Historia | Épica | Sprint | SP | Estado |
@@ -253,4 +385,14 @@ Escenario: Diferencia entre ambientes reflejada en variables
 | HU-06: Aprobación a producción | E6 | 2 | 5 | 🔄 In Progress |
 | HU-07: SonarQube en CI | E6 | 2 | 3 | 📋 Backlog |
 | HU-08: Terraform IaC | E6 | 2 | 8 | 📋 Backlog |
-| **Total** | | | **40 SP** | |
+| HU-09: Métricas y dashboards | E7 | 3 | 5 | ✅ Done |
+| HU-10: Tracing Jaeger | E7 | 3 | 3 | ✅ Done |
+| HU-11: Logs centralizados (ELK) | E7 | 3 | 5 | ✅ Done |
+| HU-12: Alertas de disponibilidad | E7 | 3 | 3 | ✅ Done |
+| HU-13: Métricas de negocio | E7 | 3 | 3 | ✅ Done |
+| HU-14: Sealed Secrets | E8 | 3 | 3 | ✅ Done |
+| HU-15: TLS + RBAC | E8 | 3 | 5 | ✅ Done |
+| HU-16: Rendimiento + seguridad | E9 | 3 | 5 | ✅ Done |
+| **Total** | | | **72 SP** | |
+
+**Épicas:** E1 Autenticación · E2 Encuestas · E3 Validación QR · E4 Notificaciones · E5 Dashboard · E6 CI/CD + IaC · E7 Observabilidad · E8 Seguridad · E9 Pruebas.
