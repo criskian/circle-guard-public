@@ -15,9 +15,9 @@ module "databases" {
   namespace   = module.namespace.namespace
   environment = local.environment
 
-  db_password    = var.db_password
-  neo4j_password = var.neo4j_password
-  jwt_secret     = var.jwt_secret
+  db_password     = var.db_password
+  neo4j_password  = var.neo4j_password
+  jwt_secret      = var.jwt_secret
   vault_hash_salt = var.vault_hash_salt
 }
 

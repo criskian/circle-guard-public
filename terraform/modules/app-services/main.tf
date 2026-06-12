@@ -20,12 +20,12 @@ resource "kubernetes_config_map" "app" {
   }
 
   data = {
-    AUTH_SERVICE_URL          = "http://auth-service:8180"
-    IDENTITY_SERVICE_URL      = "http://identity-service:8083"
-    FORM_SERVICE_URL          = "http://form-service:8086"
-    PROMOTION_SERVICE_URL     = "http://promotion-service:8088"
-    NOTIFICATION_SERVICE_URL  = "http://notification-service:8082"
-    DASHBOARD_SERVICE_URL     = "http://dashboard-service:8084"
+    AUTH_SERVICE_URL         = "http://auth-service:8180"
+    IDENTITY_SERVICE_URL     = "http://identity-service:8083"
+    FORM_SERVICE_URL         = "http://form-service:8086"
+    PROMOTION_SERVICE_URL    = "http://promotion-service:8088"
+    NOTIFICATION_SERVICE_URL = "http://notification-service:8082"
+    DASHBOARD_SERVICE_URL    = "http://dashboard-service:8084"
 
     SPRING_KAFKA_BOOTSTRAP_SERVERS = "kafka:29092"
     SPRING_DATA_REDIS_HOST         = "redis"
@@ -46,7 +46,7 @@ resource "kubernetes_config_map" "app" {
 
     SPRING_PROFILES_ACTIVE = "k8s"
 
-    CIRCLEGUARD_FEATURES_STRICT_QR_VALIDATION       = var.environment == "dev" ? "false" : "true"
+    CIRCLEGUARD_FEATURES_STRICT_QR_VALIDATION        = var.environment == "dev" ? "false" : "true"
     CIRCLEGUARD_FEATURES_EMAIL_NOTIFICATIONS_ENABLED = var.environment == "dev" ? "false" : "true"
     CIRCLEGUARD_FEATURES_QR_EXPIRATION_ENABLED       = var.environment == "dev" ? "false" : "true"
   }

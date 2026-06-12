@@ -47,22 +47,22 @@ variable "config_map_name" {
 variable "services" {
   description = "Map of microservice configurations"
   type = map(object({
-    port                   = number
-    db_name                = optional(string)
+    port                    = number
+    db_name                 = optional(string)
     readiness_initial_delay = optional(number, 30)
     liveness_initial_delay  = optional(number, 120)
-    memory_request         = optional(string, "256Mi")
-    memory_limit           = optional(string, "512Mi")
-    cpu_request            = optional(string, "100m")
-    cpu_limit              = optional(string, "500m")
-    node_port              = optional(bool, false)
-    extra_env              = optional(map(string), {})
+    memory_request          = optional(string, "256Mi")
+    memory_limit            = optional(string, "512Mi")
+    cpu_request             = optional(string, "100m")
+    cpu_limit               = optional(string, "500m")
+    node_port               = optional(bool, false)
+    extra_env               = optional(map(string), {})
   }))
 
   default = {
     "auth-service" = {
-      port     = 8180
-      db_name  = "circleguard_auth"
+      port      = 8180
+      db_name   = "circleguard_auth"
       node_port = true
       extra_env = {
         IDENTITY_SERVICE_URL = "http://identity-service:8083"
@@ -80,13 +80,13 @@ variable "services" {
       node_port              = true
     }
     "promotion-service" = {
-      port           = 8088
-      db_name        = "circleguard_promotion"
-      memory_request = "512Mi"
-      memory_limit   = "1Gi"
-      cpu_request    = "200m"
-      cpu_limit      = "1000m"
-      node_port      = true
+      port                    = 8088
+      db_name                 = "circleguard_promotion"
+      memory_request          = "512Mi"
+      memory_limit            = "1Gi"
+      cpu_request             = "200m"
+      cpu_limit               = "1000m"
+      node_port               = true
       readiness_initial_delay = 45
     }
     "notification-service" = {
