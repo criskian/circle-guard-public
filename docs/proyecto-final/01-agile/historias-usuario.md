@@ -381,10 +381,10 @@ Y OWASP ZAP produce un reporte sin vulnerabilidades críticas
 | HU-02: Encuesta diaria | E2 | 1 | 5 | ✅ Done |
 | HU-03: Validación QR | E3 | 1 | 5 | ✅ Done |
 | HU-04: Notificaciones | E4 | 1 | 3 | ✅ Done |
-| HU-05: Dashboard monitoreo | E5 | 2 | 8 | 🔄 In Progress |
-| HU-06: Aprobación a producción | E6 | 2 | 5 | 🔄 In Progress |
-| HU-07: SonarQube en CI | E6 | 2 | 3 | 📋 Backlog |
-| HU-08: Terraform IaC | E6 | 2 | 8 | 📋 Backlog |
+| HU-05: Dashboard monitoreo | E5 | 2 | 8 | ✅ Done |
+| HU-06: Aprobación a producción | E6 | 2 | 5 | ✅ Done |
+| HU-07: SonarQube en CI | E6 | 2 | 3 | ✅ Done |
+| HU-08: Terraform IaC | E6 | 2 | 8 | ✅ Done |
 | HU-09: Métricas y dashboards | E7 | 3 | 5 | ✅ Done |
 | HU-10: Tracing Jaeger | E7 | 3 | 3 | ✅ Done |
 | HU-11: Logs centralizados (ELK) | E7 | 3 | 5 | ✅ Done |

@@ -21,7 +21,7 @@
 - Stack: Spring Boot 3.2 / Java 21, Gradle, Docker, Kubernetes (kind), Jenkins, Terraform.
 
 ### 4. Requisito 1 — Metodología Ágil y Branching (10%)
-- Captura del board de GitHub Projects (Sprint 1 Done, Sprint 2 en curso).
+- Captura del board de GitHub Projects (16 historias, 3 sprints completados).
 - Diagrama GitFlow (feature → develop → main).
 - "Por qué importa": trazabilidad de historias a commits/PRs.
 

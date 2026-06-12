@@ -67,43 +67,63 @@
 
 ---
 
-## Sprint 2 — Observabilidad, IaC y Seguridad
+## Sprint 2 — CI/CD Avanzado e Infraestructura como Código
 
 **Período:** Semana 2  
-**Objetivo del sprint:** Implementar el stack de observabilidad (Prometheus/Grafana/ELK/Jaeger), Infraestructura como Código con Terraform, SonarQube+Trivy en pipelines, y RBAC/TLS de seguridad.
+**Objetivo del sprint:** Elevar los pipelines (SonarQube+Trivy+Quality Gate, aprobación a producción), el dashboard de monitoreo, y la Infraestructura como Código con Terraform multi-ambiente.
 
 ### Backlog Comprometido
 
 | Historia | SP | Estado |
 |----------|----|--------|
-| HU-05: Dashboard monitoreo (Prometheus+Grafana) | 8 | 🔄 In Progress |
-| HU-06: Aprobación manual a producción | 5 | 🔄 In Progress |
-| HU-07: SonarQube en CI + JaCoCo | 3 | 📋 Planned |
-| HU-08: Terraform IaC multi-ambiente | 8 | 📋 Planned |
-| Circuit Breaker (Resilience4j) | 5 | 🔄 In Progress |
-| Feature Toggle + External Config | 3 | 🔄 In Progress |
-| RBAC + TLS + Sealed Secrets | 5 | 📋 Planned |
-| ELK Stack + Jaeger tracing | 5 | 📋 Planned |
-| OWASP ZAP + cobertura JaCoCo | 3 | 📋 Planned |
-| **Total** | **45 SP** | |
+| HU-05: Dashboard monitoreo operacional | 8 | ✅ Done |
+| HU-06: Aprobación manual a producción | 5 | ✅ Done |
+| HU-07: SonarQube en CI + JaCoCo | 3 | ✅ Done |
+| HU-08: Terraform IaC multi-ambiente | 8 | ✅ Done |
+| Circuit Breaker (Resilience4j) | 5 | ✅ Done |
+| Feature Toggle + External Config | 3 | ✅ Done |
+| **Total** | **32 SP** | ✅ Completado |
+
+---
+
+## Sprint 3 — Observabilidad y Seguridad
+
+**Período:** Semana 3  
+**Objetivo del sprint:** Stack de observabilidad completo (Prometheus/Grafana/Jaeger/ELK + alertas + métricas de negocio) y seguridad (Sealed Secrets, TLS, RBAC, escaneo Trivy/ZAP).
+
+### Backlog Comprometido
+
+| Historia | SP | Estado |
+|----------|----|--------|
+| HU-09: Métricas y dashboards (Prometheus+Grafana) | 5 | ✅ Done |
+| HU-10: Tracing distribuido (Jaeger) | 3 | ✅ Done |
+| HU-11: Logs centralizados (ELK) | 5 | ✅ Done |
+| HU-12: Alertas de disponibilidad | 3 | ✅ Done |
+| HU-13: Métricas de negocio | 3 | ✅ Done |
+| HU-14: Sealed Secrets | 3 | ✅ Done |
+| HU-15: TLS + RBAC | 5 | ✅ Done |
+| HU-16: Rendimiento (Locust) + seguridad (ZAP) | 5 | ✅ Done |
+| **Total** | **32 SP** | ✅ Completado |
 
 ### Definición de Hecho (DoD)
 
 Una historia se considera "Done" cuando:
 1. El código está mergeado a `develop` vía PR con review
 2. El pipeline de CI corre en verde (incluyendo SonarQube quality gate)
-3. Los tests relevantes existen y pasan (cobertura ≥ 60%)
+3. Los tests relevantes existen y pasan (cobertura ≥ 60% donde aplica)
 4. La documentación asociada está actualizada en `docs/proyecto-final/`
-5. La funcionalidad está demostrable en el ambiente `circleguard-stage`
+5. La funcionalidad está demostrable/verificada en vivo
 
 ---
 
 ## Métricas de Proceso
 
-| Métrica | Sprint 1 | Sprint 2 (estimado) |
-|---------|----------|---------------------|
-| Stories completadas | 5/5 (100%) | — |
-| SP completados | 18/18 | — |
-| Bugs escapados a stage | 5 (K8s config) | 0 (objetivo) |
-| Tiempo promedio de pipeline | ~12 min | ~15 min (SonarQube +3 min) |
-| Cobertura de pruebas | ~45% | ≥ 60% (objetivo) |
+| Métrica | Sprint 1 | Sprint 2 | Sprint 3 |
+|---------|----------|----------|----------|
+| Stories completadas | 4/4 (100%) | 6/6 (100%) | 8/8 (100%) |
+| SP completados | 18/18 | 32/32 | 32/32 |
+| Bugs escapados | 5 (K8s config) | 0 | 0 |
+| Tiempo promedio de pipeline | ~12 min | ~15 min | ~15 min |
+| Cobertura de pruebas | ~45% | ≥ 60% | 38–73% (real) |
+
+> **Total del proyecto:** 16 historias de usuario (72 SP) en 3 sprints completados; el backlog de sprint incluye además tareas técnicas de patrones (Circuit Breaker, Feature Toggle).

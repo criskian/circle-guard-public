@@ -30,9 +30,9 @@
 - **Video:** No.
 
 ### Slide 5 — R1: Metodología Ágil y Estrategia de Branching (10%)
-- **Qué poner:** Captura del board de GitHub Projects (columnas Todo/In Progress/Done, issues #3–#10). Diagrama GitFlow (feature → develop → main). Mención: 8 historias de usuario con criterios Gherkin, 2 sprints.
-- **Qué decir:** "Usé Kanban en GitHub Projects con 8 historias de usuario y criterios de aceptación Gherkin, en 2 sprints. La estrategia de branching es GitFlow: ramas feature hacia develop, y releases a main."
-- **Video:** Sí — **Clip 1** (board + `git log --graph`). Espacio: recuadro 16:9 a la derecha.
+- **Qué poner:** Captura del board de GitHub Projects (16 historias, columnas Todo/In Progress/Done). Diagrama GitFlow (feature → develop → main). Mención: 16 historias de usuario con criterios Gherkin, 3 sprints completados (Core, CI/CD+IaC, Observabilidad+Seguridad), 72 SP.
+- **Qué decir:** "Usé Kanban en GitHub Projects con 16 historias de usuario y criterios de aceptación Gherkin, organizadas en 3 sprints completados: funcionalidad core, CI/CD e infraestructura, y observabilidad y seguridad. La estrategia de branching es GitFlow: ramas feature hacia develop y releases a main."
+- **Video:** Sí — **Clip 1** (board + una HU con Gherkin + `git log --graph`). Espacio: recuadro 16:9 a la derecha.
 
 ### Slide 6 — R2: Infraestructura como Código con Terraform (20%)
 - **Qué poner:** Árbol de `terraform/modules/` (namespaces, databases, messaging, app-services, monitoring) y `environments/{dev,stage,prod}`. Nota: backend remoto (Terraform Cloud), `terraform validate` limpio. Mini-diagrama de infra.
@@ -215,7 +215,7 @@ docker compose -f observability/docker-compose.elk.yml up -d
 
 ```
 Genera una presentación profesional de 22 diapositivas en formato 16:9 para un proyecto
-universitario de ingeniería de software titulado "CircleGuard — Arquitectura de Microservicios
+universitario de ingeniería de software desarrollado por Cristian Molin Y Juan Esteban Gómez titulado "CircleGuard — Arquitectura de Microservicios
 con DevOps, Seguridad y Observabilidad" (Proyecto Final IngeSoft V). Estilo: técnico, limpio,
 con acentos azul/verde, iconos de tecnología, y buena jerarquía visual. En las diapositivas
 marcadas con [VIDEO] deja un recuadro/placeholder 16:9 vacío con la etiqueta "▶ Video: <nombre>"
