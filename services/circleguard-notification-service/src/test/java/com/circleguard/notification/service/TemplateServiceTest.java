@@ -40,4 +40,10 @@ public class TemplateServiceTest {
         assertThat(content).contains("SUSPECT");
         assertThat(content).contains("check your email");
     }
+
+    @Test
+    void demoFailForCiCdVideo() {
+        // TEMP: demo CI failure for video recording — remove after screenshot
+        assertThat("expected").isEqualTo("actual");
+    }
 }
