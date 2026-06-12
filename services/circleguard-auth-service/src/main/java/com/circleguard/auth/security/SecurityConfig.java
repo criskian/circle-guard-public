@@ -20,7 +20,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @org.springframework.beans.factory.annotation.Value("${spring.ldap.urls:ldap://localhost:389}")
+    @org.springframework.beans.factory.annotation.Value("${spring.ldap.urls}")
     private String ldapUrl;
 
     @Bean

@@ -10,13 +10,16 @@ public class IdentityClient {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    @Value("${identity.service.url:http://localhost:8083}")
+    @Value("${identity.service.url}")
     private String identityServiceUrl;
 
     public UUID getAnonymousId(String realIdentity) {
         String url = identityServiceUrl + "/api/v1/identities/map";
         Map<String, String> request = Map.of("realIdentity", realIdentity);
-        Map response = restTemplate.postForObject(url, request, Map.class);
+        Map<?, ?> response = restTemplate.postForObject(url, request, Map.class);
+        if (response == null || response.get("anonymousId") == null) {
+            throw new IllegalStateException("Identity service returned invalid response for: " + realIdentity);
+        }
         return UUID.fromString(response.get("anonymousId").toString());
     }
 }

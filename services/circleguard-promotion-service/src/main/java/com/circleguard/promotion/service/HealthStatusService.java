@@ -4,8 +4,10 @@ import com.circleguard.promotion.exception.FenceException;
 import com.circleguard.promotion.repository.graph.UserNodeRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.neo4j.core.Neo4jClient;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -24,6 +26,10 @@ public class HealthStatusService {
     private final com.circleguard.promotion.repository.jpa.SystemSettingsRepository systemSettingsRepository;
     private final com.circleguard.promotion.repository.graph.CircleNodeRepository circleNodeRepository;
 
+    @Autowired
+    @Lazy
+    private HealthStatusService self;
+
     private static final String STATUS_KEY_PREFIX = "user:status:";
     private static final String TOPIC_STATUS_CHANGED = "promotion.status.changed";
 
@@ -32,7 +38,7 @@ public class HealthStatusService {
      * Consolidated into a single transaction with optimized Cypher to meet NFR-1 (<1s target).
      */
     public void updateStatus(String anonymousId, String status) {
-        updateStatus(anonymousId, status, false);
+        self.updateStatus(anonymousId, status, false);
     }
 
     @Transactional("neo4jTransactionManager")
@@ -180,7 +186,7 @@ public class HealthStatusService {
      * Implements the "Pulse Recovery" algorithm for Story 4.4.
      */
     public void resolveStatus(String anonymousId) {
-        resolveStatus(anonymousId, false);
+        self.resolveStatus(anonymousId, false);
     }
 
     @Transactional("neo4jTransactionManager")
@@ -273,7 +279,7 @@ public class HealthStatusService {
      */
     @Transactional("neo4jTransactionManager")
     public void promoteToRecovered(String anonymousId) {
-        resolveStatus(anonymousId);
+        self.resolveStatus(anonymousId);
         // Note: resolveStatus sets to ACTIVE first, then we update to RECOVERED
         neo4jClient.query("MATCH (u:User {anonymousId: $id}) SET u.status = 'RECOVERED'")
                 .bind(anonymousId).to("id").run();
